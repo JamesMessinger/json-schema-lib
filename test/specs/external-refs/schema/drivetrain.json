@@ -1,0 +1,16 @@
+{
+  "title": "Drivetrain",
+  "type": "object",
+  "required": [
+    "engine",
+    "transmission"
+  ],
+  "properties": {
+    "engine": {
+      "$ref": "engine.json"
+    },
+    "transmission": {
+      "$ref": "transmission.json"
+    }
+  }
+}

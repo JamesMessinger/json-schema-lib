@@ -1,0 +1,17 @@
+{
+  "title": "Transmission",
+  "type": "object",
+  "required": [
+    "type",
+    "gears"
+  ],
+  "properties": {
+    "type": {
+      "$ref": "transmission-type.json"
+    },
+    "gears": {
+      "type": "integer",
+      "min": 1
+    }
+  }
+}

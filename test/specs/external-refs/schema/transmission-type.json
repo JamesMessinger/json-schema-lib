@@ -1,0 +1,8 @@
+{
+  "title": "TransmissionType",
+  "type": "string",
+  "enum": [
+    "manual",
+    "automatic"
+  ]
+}

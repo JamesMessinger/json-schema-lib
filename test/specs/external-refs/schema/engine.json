@@ -1,0 +1,23 @@
+{
+  "title": "Engine",
+  "type": "object",
+  "required": [
+    "size",
+    "horsepower",
+    "cylanders"
+  ],
+  "properties": {
+    "size": {
+      "type": "integer",
+      "min": 1
+    },
+    "horsepower": {
+      "type": "integer",
+      "min": 1
+    },
+    "cylanders": {
+      "type": "integer",
+      "min": 1
+    }
+  }
+}
