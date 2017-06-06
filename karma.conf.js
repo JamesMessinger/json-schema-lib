@@ -17,7 +17,7 @@ module.exports = function (karma) {
       'test/fixtures/*.js',
 
       // Test Specs
-      'test/specs/*.js',
+      'test/specs/*/*.spec.js',
       { pattern: 'test/specs/**', included: false, served: true },
     ]
   };
