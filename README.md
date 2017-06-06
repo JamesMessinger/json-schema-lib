@@ -5,7 +5,7 @@ JSON Schema Lib
 [![Windows Build Status](https://ci.appveyor.com/api/projects/status/github/bigstickcarpet/json-schema-lib?svg=true&branch=master&failingText=Windows%20build%20failing&passingText=Windows%20build%20passing)](https://ci.appveyor.com/project/BigstickCarpet/json-schema-lib/branch/master)
 
 [![Coverage Status](https://coveralls.io/repos/BigstickCarpet/json-schema-lib/badge.svg?branch=master&service=github)](https://coveralls.io/r/BigstickCarpet/json-schema-lib)
-[![Codacy Score](https://api.codacy.com/project/badge/Grade/d8abfe5e9a4044b89bd9f4b999d4a574)](https://www.codacy.com/public/jamesmessinger/json-schema-lib)
+[![Codacy Score](https://api.codacy.com/project/badge/Grade/c534bafe6ea349d8883761996f545d4f)](https://www.codacy.com/public/jamesmessinger/json-schema-lib)
 [![Inline docs](http://inch-ci.org/github/BigstickCarpet/json-schema-lib.svg?branch=master&style=shields)](http://inch-ci.org/github/BigstickCarpet/json-schema-lib)
 [![Dependencies](https://david-dm.org/BigstickCarpet/json-schema-lib.svg)](https://david-dm.org/BigstickCarpet/json-schema-lib)
 
