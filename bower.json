@@ -1,0 +1,46 @@
+{
+  "name": "json-schema-lib",
+  "description": "Resolves JSON Schema $ref pointers, even to external files and URLs",
+  "keywords": [
+    "json",
+    "schema",
+    "reference",
+    "pointer",
+    "jsonschema",
+    "json-schema",
+    "json-reference",
+    "json-pointer",
+    "$ref",
+    "resolve",
+    "dereference",
+    "bundle",
+    "validate"
+  ],
+  "authors": [
+    {
+      "name": "James Messinger",
+      "homepage": "http://jamesmessinger.com"
+    }
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/BigstickCarpet/json-schema-lib",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BigstickCarpet/json-schema-lib.git"
+  },
+  "main": "dist/json-schema-lib.js",
+  "ignore": [
+    "/bower_components",
+    "/dist/*.test.js",
+    "/docs",
+    "/lib",
+    "/test",
+    "/.*",
+    "/*.js",
+    "/*.json",
+    "/*.txt",
+    "/*.yml"
+  ],
+  "dependencies": {},
+  "devDependencies": {}
+}
