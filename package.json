@@ -48,7 +48,7 @@
     "release": "npm run upgrade && npm run build && npm test && npm run bump && npm publish"
   },
   "devDependencies": {
-    "chai": "^4.0.1",
+    "chai": "^4.0.2",
     "codacy-coverage": "^2.0.0",
     "coveralls": "^2.11.9",
     "eslint": "^3.13.1",
@@ -72,6 +72,7 @@
   },
   "dependencies": {
     "call-me-maybe": "^1.0.1",
+    "karma-chai": "^0.1.0",
     "ono": "^3.0.0"
   }
 }
