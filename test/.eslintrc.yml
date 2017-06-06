@@ -7,6 +7,9 @@ extends:
   - modular/browser
 
 globals:
+  # ES2015 Types
+  Promise: false
+
   # JSON Schema Lib
   JsonSchema: false
 
