@@ -1,0 +1,5 @@
+--bail
+--async-only
+--require karma-host-environment
+test/fixtures/*.js
+test/specs/*.js

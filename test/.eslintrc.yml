@@ -1,0 +1,19 @@
+# ESLint config
+# http://eslint.org/docs/user-guide/configuring
+# https://github.com/BigstickCarpet/eslint-config-modular
+
+extends:
+  - modular/test
+  - modular/browser
+
+globals:
+  # JSON Schema Lib
+  JsonSchema: false
+
+  # karma-host-environment
+  # https://www.npmjs.com/package/karma-host-environment
+  host: false
+
+  # Test Fixtures
+  assert: false
+  path: false
