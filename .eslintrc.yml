@@ -10,3 +10,7 @@ extends:
   - modular/browser
   - modular/node
   - modular/es5
+
+globals:
+  # ES2015 Types
+  Promise: false
