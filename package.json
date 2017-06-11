@@ -38,7 +38,7 @@
   ],
   "scripts": {
     "lint": "eslint lib test --fix",
-    "build": "simplifyify lib/browser.js --outfile dist/json-schema-lib.js --standalone \\JsonSchema --bundle --debug --minify",
+    "build": "simplifyify lib/browser.js --outfile dist/json-schema-lib.js --standalone \\JsonSchemaLib --bundle --debug --minify",
     "test": "npm run mocha && npm run karma && npm run lint",
     "cover": "istanbul cover _mocha --dir coverage/node && npm run build -- --test && npm run karma -- --cover",
     "mocha": "mocha",
@@ -56,6 +56,7 @@
     "istanbul": "^0.4.5",
     "karma": "^1.4.0",
     "karma-chrome-launcher": "^2.0.0",
+    "karma-chai": "^0.1.0",
     "karma-cli": "^1.0.1",
     "karma-coverage": "^1.1.1",
     "karma-firefox-launcher": "^1.0.0",
@@ -71,8 +72,6 @@
     "version-bump-prompt": "^3.0.1"
   },
   "dependencies": {
-    "call-me-maybe": "^1.0.1",
-    "karma-chai": "^0.1.0",
     "ono": "^3.0.0"
   }
 }
