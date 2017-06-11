@@ -11,7 +11,7 @@
   }
   else {
     // Expose Node globals
-    global.JsonSchema = require('../../');
+    global.JsonSchemaLib = require('../../');
     global.expect = require('chai').expect;
   }
 
