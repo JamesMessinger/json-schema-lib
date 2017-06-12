@@ -5,7 +5,7 @@
 
     it('should only parse the root file', function () {
       return Promise.resolve();
-      // return JsonSchema.parse(path.abs('specs/external-refs/schema/vehicle.json'))
+      // return jsonSchemaLib.parse(path.abs('specs/external-refs/schema/vehicle.json'))
       //   .then(function (schema) {
       //     assert.validSchema(schema);
 

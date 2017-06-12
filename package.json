@@ -27,7 +27,7 @@
     "type": "git",
     "url": "https://github.com/BigstickCarpet/json-schema-lib.git"
   },
-  "main": "lib/index.js",
+  "main": "lib/node.js",
   "browser": "dist/json-schema-lib.js",
   "files": [
     "dist/json-schema-lib.js",
@@ -38,7 +38,7 @@
   ],
   "scripts": {
     "lint": "eslint lib test --fix",
-    "build": "simplifyify lib/browser.js --outfile dist/json-schema-lib.js --standalone \\JsonSchemaLib --bundle --debug --minify",
+    "build": "simplifyify lib/browser.js --outfile dist/json-schema-lib.js --standalone jsonSchemaLib --bundle --debug --minify",
     "test": "npm run mocha && npm run karma && npm run lint",
     "cover": "istanbul cover _mocha --dir coverage/node && npm run build -- --test && npm run karma -- --cover",
     "mocha": "mocha",
