@@ -7,7 +7,7 @@ extends:
   - modular/browser
 
 globals:
-  # JSON Schema Lib
+  # JsonSchemaLib
   jsonSchemaLib: false
 
   # karma-host-environment

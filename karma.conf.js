@@ -9,7 +9,7 @@ module.exports = function (karma) {
     reporters: ['verbose'],
 
     files: [
-      // JSON Schema Lib
+      // JsonSchemaLib
       'dist/json-schema-lib.min.js',
       { pattern: '*.map', included: false, served: true },
 

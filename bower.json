@@ -1,6 +1,6 @@
 {
   "name": "json-schema-lib",
-  "description": "Resolves JSON Schema $ref pointers, even to external files and URLs",
+  "description": "Easily read, edit, and validate JSON Schemas, even multi-file schemas using $ref",
   "keywords": [
     "json",
     "schema",

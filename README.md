@@ -1,5 +1,6 @@
-JSON Schema Lib
+JsonSchemaLib
 ============================
+Easily read, edit, and validate JSON Schemas, even multi-file schemas using $ref
 
 [![Build Status](https://api.travis-ci.org/BigstickCarpet/json-schema-lib.svg?branch=master)](https://travis-ci.org/BigstickCarpet/json-schema-lib)
 [![Windows Build Status](https://ci.appveyor.com/api/projects/status/github/bigstickcarpet/json-schema-lib?svg=true&branch=master&failingText=Windows%20build%20failing&passingText=Windows%20build%20passing)](https://ci.appveyor.com/project/BigstickCarpet/json-schema-lib/branch/master)
