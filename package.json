@@ -1,7 +1,7 @@
 {
   "name": "json-schema-lib",
   "version": "0.0.1",
-  "description": "Easily read, edit, and validate JSON Schemas, even multi-file schemas using $ref",
+  "description": "Extensible JSON Schema library with support for multi-file schemas using $ref",
   "keywords": [
     "json",
     "schema",
