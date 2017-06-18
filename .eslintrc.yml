@@ -14,3 +14,4 @@ extends:
 globals:
   # ES2015 Types
   Promise: false
+  Symbol: false
