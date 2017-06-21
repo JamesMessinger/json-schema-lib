@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  var assert = host.global.assert || {};
+  var assert = host.global.assert = host.global.assert || {};
 
   /**
    * Asserts that the given {@link Schema} object is well-formed and complies
