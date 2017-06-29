@@ -15,3 +15,14 @@ globals:
   # ES2015 Types
   Promise: false
   Symbol: false
+  ArrayBuffer: false
+  Int8Array: false
+  Uint8Array: false
+  Uint8ClampedArray: false
+  Int16Array: false
+  Uint16Array: false
+  Int32Array: false
+  Uint32Array: false
+  Float32Array: false
+  Float64Array: false
+  DataView: false
