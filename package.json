@@ -72,6 +72,7 @@
     "version-bump-prompt": "^3.0.1"
   },
   "dependencies": {
+    "content-type": "^1.0.2",
     "follow-redirects": "^1.2.3",
     "mime-types": "^2.1.15",
     "ono": "^3.1.0"
