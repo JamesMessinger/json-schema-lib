@@ -2,4 +2,4 @@
 --async-only
 --require karma-host-environment
 test/fixtures/*.js
-test/specs/*/*.spec.js
+test/specs/**/*.spec.js

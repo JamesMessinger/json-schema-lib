@@ -15,10 +15,10 @@ module.exports = function (karma) {
 
       // Test Fixtures
       'test/fixtures/*.js',
+      { pattern: 'test/schemas/**', included: false, served: true },
 
       // Test Specs
-      'test/specs/*/*.spec.js',
-      { pattern: 'test/specs/**', included: false, served: true },
+      'test/specs/**/*.spec.js',
     ]
   };
 

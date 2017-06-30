@@ -3,7 +3,7 @@
 
   describe('Parsing a schema with external $refs', function () {
 
-    it('should only parse the root file', function () {
+    it.skip('should only parse the root file', function () {
       return jsonSchemaLib.read(path.abs('specs/external-refs/schema/vehicle.json'))
         .then(function (schema) {
           assert.validSchema(schema);
