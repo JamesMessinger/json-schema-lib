@@ -1,0 +1,28 @@
+{
+    "title": "Person",
+    "type": "object",
+    "required": ["firstName", "lastName"],
+    "properties": {
+        "firstName": {
+            "$ref": "#/definitions/name"
+        },
+        "lastName": {
+            "$ref": "#/definitions/name"
+        },
+        "age": {
+            "$ref": "#/definitions/age"
+        }
+    },
+    "definitions": {
+        "name": {
+            "description": "A proper name",
+            "type": "string",
+            "minLength": 1
+        },
+        "age":{
+            "description": "Age in years",
+            "type": "integer",
+            "minimum": 0
+        }
+    }
+}
