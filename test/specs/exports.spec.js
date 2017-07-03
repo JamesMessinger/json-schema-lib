@@ -48,6 +48,9 @@
       expect(jsonSchemaLib).to.have.all.keys(
         'read', 'readAsync', 'readSync', 'create', 'config', 'plugins', 'util', 'default'
       );
+
+      expect(jsonSchemaLib.util).to.have.all.keys('isSchema', 'isSchema');
+
       done();
     });
 
