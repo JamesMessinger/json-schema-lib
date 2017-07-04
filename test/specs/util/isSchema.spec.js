@@ -23,7 +23,7 @@
       // Create a new instance of JsonSchemaLib with a dummy plugin
       var instance = jsonSchemaLib.create();
       instance.use({
-        priority: 1000,
+        priority: 100,
         resolveURL: pluginMethod,
         readFileSync: pluginMethod,
         decodeFile: pluginMethod,
