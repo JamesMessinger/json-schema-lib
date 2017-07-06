@@ -30,7 +30,7 @@
         file = urlEncodePath(file);
 
         if (host.karma) {
-          throw new Error('TODO: Figure out how to return relative paths in Karma');
+          return 'base/test/' + file;
         }
         else {
           // Return the relative path from "/test/index.html"
