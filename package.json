@@ -68,13 +68,13 @@
     "karma-verbose-reporter": "0.0.6",
     "mocha": "^3.2.0",
     "npm-check": "^5.4.0",
-    "simplifyify": "^3.2.3",
+    "simplifyify": "^3.2.4",
     "version-bump-prompt": "^3.0.1"
   },
   "dependencies": {
     "content-type": "^1.0.2",
     "follow-redirects": "^1.2.3",
     "mime-types": "^2.1.15",
-    "ono": "^3.1.0"
+    "ono": "^4.0.1"
   }
 }
