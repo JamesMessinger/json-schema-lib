@@ -1,5 +1,5 @@
 /*!
- * Json Schema Lib v0.0.4 (July 8th 2017)
+ * Json Schema Lib v0.0.5 (July 8th 2017)
  * 
  * https://github.com/BigstickCarpet/json-schema-lib
  * 
@@ -677,6 +677,7 @@ function readReferencedFiles (schema, callback) {
 
 var File = require('../File');
 var typeOf = require('../../util/typeOf');
+var stripHash = require('../../util/stripHash');
 
 module.exports = resolveFileReferences;
 
@@ -746,6 +747,9 @@ function resolveFileReference (url, file) {
   var schema = file.schema;
   var newFile = new File(schema);
 
+  // Remove any hash from the URL, since this URL represents the WHOLE file, not a fragment of it
+  url = stripHash(url);
+
   // Resolve the new file's absolute URL
   newFile.url = schema.plugins.resolveURL({ from: file.url, to: url });
 
@@ -755,7 +759,7 @@ function resolveFileReference (url, file) {
   }
 }
 
-},{"../../util/typeOf":33,"../File":2}],8:[function(require,module,exports){
+},{"../../util/stripHash":32,"../../util/typeOf":33,"../File":2}],8:[function(require,module,exports){
 'use strict';
 
 var ono = require('ono');
