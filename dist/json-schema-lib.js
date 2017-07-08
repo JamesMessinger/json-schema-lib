@@ -1,5 +1,5 @@
 /*!
- * Json Schema Lib v0.0.2 (July 6th 2017)
+ * Json Schema Lib v0.0.4 (July 8th 2017)
  * 
  * https://github.com/BigstickCarpet/json-schema-lib
  * 
@@ -201,7 +201,7 @@ function FileArray () {
    * @param {string} url - An absolute or relative file path or URL
    * @returns {boolean}
    */
-  files.exists = function exists (url) {
+  files.exists = function exists (url) {                                                        // eslint-disable-line no-unused-vars
     // TODO: Implement File.exists()
   };
 
@@ -211,7 +211,7 @@ function FileArray () {
    * @param {string} url - An absolute or relative file path or URL
    * @returns {File}
    */
-  files.get = function get (url) {
+  files.get = function get (url) {                                                              // eslint-disable-line no-unused-vars
     // TODO: Implement File.get()
   };
 
@@ -1229,7 +1229,7 @@ Schema.prototype.toString = function () {
  *
  * @returns {boolean}      - Returns true if the value exists, or false otherwise
  */
-Schema.prototype.exists = function (pointer) {
+Schema.prototype.exists = function (pointer) {                                                            // eslint-disable-line no-unused-vars
   // TODO: pointer can be a JSON Pointer (starting with a /) or a URL
 };
 
@@ -1243,7 +1243,7 @@ Schema.prototype.exists = function (pointer) {
  *                           an object, array, string, number, null, undefined, NaN, etc.
  *                           If the value is not found, then an error is thrown.
  */
-Schema.prototype.get = function (pointer) {
+Schema.prototype.get = function (pointer) {                                                               // eslint-disable-line no-unused-vars
   // TODO: pointer can be a JSON Pointer (starting with a /) or a URL
 };
 
@@ -1256,7 +1256,7 @@ Schema.prototype.get = function (pointer) {
  * @param {*}      value   - The value to assign. This can be ANY JavaScript type, including
  *                           an object, array, string, number, null, undefined, NaN, etc.
  */
-Schema.prototype.set = function (pointer, value) {
+Schema.prototype.set = function (pointer, value) {                                                        // eslint-disable-line no-unused-vars
   // TODO: pointer can be a JSON Pointer (starting with a /) or a URL
 };
 
@@ -1680,6 +1680,7 @@ module.exports = {
 
 var ono = require('ono');
 var setHttpMetadata = require('../util/setHttpMetadata');
+var safeCall = require('../util/safeCall');
 
 /**
  * This plugin enables downlaoding files via the browser's XMLHttpRequest API.
@@ -1704,7 +1705,7 @@ module.exports = {
     var config = args.config;
     var error, response;
 
-    sendRequest(false, file.url, config, function handleResponse (err, res) {
+    safeCall(sendRequest, false, file.url, config, function handleResponse (err, res) {
       error = err;
       response = res;
     });
@@ -1729,7 +1730,7 @@ module.exports = {
     var config = args.config;
     var next = args.next;
 
-    sendRequest(false, file.url, config, function handleResponse (err, res) {
+    safeCall(sendRequest, false, file.url, config, function handleResponse (err, res) {
       if (err) {
         next(err);
       }
@@ -1758,20 +1759,7 @@ function sendRequest (async, url, config, callback) {
   req.ontimeout = handleError;
   req.onload = handleResponse;
 
-  req.withCredentials = config.http.withCredentials;
-
-  // Timeout can only be set for async requests
-  if (async) {
-    req.timeout = config.http.timeout;
-  }
-
-  // Set request headers
-  Object.keys(config.http.headers).forEach(function (key) {
-    var value = config.http.headers[key];
-    if (value !== undefined) {
-      req.setRequestHeader(key, value);
-    }
-  });
+  setXHRConfig(req, config);
 
   req.send();
 
@@ -1796,6 +1784,36 @@ function sendRequest (async, url, config, callback) {
   function handleError (err) {
     callback(err);
   }
+}
+
+/**
+ * Sets the XMLHttpRequest properties, per the specified configuration.
+ *
+ * @param {XMLHttpRequest} req
+ * @param {Config} config
+ */
+function setXHRConfig (req, config) {
+  try {
+    req.withCredentials = config.http.withCredentials;
+  }
+  catch (err) {
+    // Some browsers don't allow `withCredentials` to be set for synchronous requests
+  }
+
+  try {
+    req.timeout = config.http.timeout;
+  }
+  catch (err) {
+    // Some browsers don't allow `timeout` to be set for synchronous requests
+  }
+
+  // Set request headers
+  Object.keys(config.http.headers).forEach(function (key) {
+    var value = config.http.headers[key];
+    if (value !== undefined) {
+      req.setRequestHeader(key, value);
+    }
+  });
 }
 
 /**
@@ -1849,7 +1867,7 @@ function parseResponseHeaders (headers) {
   return parsed;
 }
 
-},{"../util/setHttpMetadata":30,"ono":35}],22:[function(require,module,exports){
+},{"../util/safeCall":29,"../util/setHttpMetadata":30,"ono":35}],22:[function(require,module,exports){
 'use strict';
 
 var ono = require('ono');
@@ -2456,8 +2474,9 @@ module.exports = format;
 
 var format = require('format-util');
 var slice = Array.prototype.slice;
-var vendorSpecificErrorProperties = [
-  'name', 'message', 'description', 'number', 'fileName', 'lineNumber', 'columnNumber',
+var protectedProperties = ['name', 'message', 'stack'];
+var errorPrototypeProperties = [
+  'name', 'message', 'description', 'number', 'code', 'fileName', 'lineNumber', 'columnNumber',
   'sourceURL', 'line', 'column', 'stack'
 ];
 
@@ -2486,28 +2505,28 @@ function create (Klass) {
    * @returns {Error}
    */
   return function onoFactory (err, props, message, params) {   // eslint-disable-line no-unused-vars
-    var formattedMessage;
+    var formatArgs = [];
+    var formattedMessage = '';
 
+    // Determine which arguments were actually specified
     if (typeof err === 'string') {
-      formattedMessage = module.exports.formatter.apply(null, arguments);
+      formatArgs = arguments;
       err = props = undefined;
     }
     else if (typeof props === 'string') {
-      formattedMessage = module.exports.formatter.apply(null, slice.call(arguments, 1));
+      formatArgs = slice.call(arguments, 1);
+      props = undefined;
     }
     else if (typeof message === 'string') {
-      formattedMessage = module.exports.formatter.apply(null, slice.call(arguments, 2));
-    }
-    else {
-      formattedMessage = '';
+      formatArgs = slice.call(arguments, 2);
     }
 
-    if (!(err instanceof Error)) {
-      props = err;
-      err = undefined;
+    // If there are any format arguments, then format the error message
+    if (formatArgs.length > 0) {
+      formattedMessage = module.exports.formatter.apply(null, formatArgs);
     }
 
-    if (err) {
+    if (err && err.message) {
       // The inner-error's message will be added to the new message
       formattedMessage += (formattedMessage ? ' \n' : '') + err.message;
     }
@@ -2533,7 +2552,7 @@ function create (Klass) {
  */
 function extendError (targetError, sourceError) {
   extendStack(targetError, sourceError);
-  extend(targetError, sourceError, true);
+  extend(targetError, sourceError);
 }
 
 /**
@@ -2553,16 +2572,16 @@ function extendToJSON (error) {
  *
  * @param {object}  target - The object to extend
  * @param {?source} source - The object whose properties are copied
- * @param {boolean} omitVendorSpecificProperties - Skip vendor-specific Error properties
  */
-function extend (target, source, omitVendorSpecificProperties) {
+function extend (target, source) {
   if (source && typeof source === 'object') {
     var keys = Object.keys(source);
     for (var i = 0; i < keys.length; i++) {
       var key = keys[i];
 
-      // Don't bother trying to copy read-only vendor-specific Error properties
-      if (omitVendorSpecificProperties && vendorSpecificErrorProperties.indexOf(key) >= 0) {
+      // Don't copy "protected" properties, since they have special meaning/behavior
+      // and are set by the onoFactory function
+      if (protectedProperties.indexOf(key) >= 0) {
         continue;
       }
 
@@ -2588,8 +2607,8 @@ function errorToJSON () {
   // Get all the properties of this error
   var keys = Object.keys(this);
 
-  // Also include vendor-specific properties from the prototype
-  keys = keys.concat(vendorSpecificErrorProperties);
+  // Also include properties from the Error prototype
+  keys = keys.concat(errorPrototypeProperties);
 
   for (var i = 0; i < keys.length; i++) {
     var key = keys[i];
