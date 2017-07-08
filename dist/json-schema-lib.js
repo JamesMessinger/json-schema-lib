@@ -98,7 +98,7 @@ function validateConfig (config) {
   }
 }
 
-},{"../util/Promise":22,"../util/deepClone":24,"../util/typeOf":32,"ono":35}],2:[function(require,module,exports){
+},{"../util/Promise":23,"../util/deepClone":25,"../util/typeOf":33,"ono":36}],2:[function(require,module,exports){
 'use strict';
 
 var omit = require('../util/omit');
@@ -182,47 +182,103 @@ File.prototype.toJSON = function toJSON () {
   return omit(this, 'schema', __internal);
 };
 
-},{"../util/internal":25,"../util/omit":28}],3:[function(require,module,exports){
+},{"../util/internal":26,"../util/omit":29}],3:[function(require,module,exports){
 'use strict';
+
+var ono = require('ono');
+var File = require('./File');
 
 module.exports = FileArray;
 
 /**
  * An array of {@link File} objects, with some helper methods.
  *
+ * @param {Schema} schema - The JSON Schema that these files are part of
  * @returns {array}
  */
-function FileArray () {
+function FileArray (schema) {
   var files = [];
 
   /**
    * Determines whether a given file is in the array.
    *
-   * @param {string} url - An absolute or relative file path or URL
+   * @param {string|File} url
+   * An absolute URL, or a relative URL (relative to the schema's root file), or a {@link File} object
+   *
    * @returns {boolean}
    */
-  files.exists = function exists (url) {                                                        // eslint-disable-line no-unused-vars
-    // TODO: Implement File.exists()
+  files.exists = function exists (url) {
+    if (this.length === 0) {
+      return false;
+    }
+
+    // Get the absolute URL
+    var absoluteURL = resolveURL(url, schema);
+
+    // Try to find a file with this URL
+    for (var i = 0; i < this.length; i++) {
+      var file = this[i];
+      if (file.url === absoluteURL) {
+        return true;
+      }
+    }
+
+    // If we get here, thne no files matched the URL
+    return false;
   };
 
   /**
    * Returns the given file in the array. Throws an error if not found.
    *
-   * @param {string} url - An absolute or relative file path or URL
+   * @param {string|File} url
+   * An absolute URL, or a relative URL (relative to the schema's root file), or a {@link File} object
+   *
    * @returns {File}
    */
-  files.get = function get (url) {                                                              // eslint-disable-line no-unused-vars
-    // TODO: Implement File.get()
+  files.get = function get (url) {
+    if (this.length === 0) {
+      throw ono('Unable to get %s. \nThe schema is empty.', url);
+    }
+
+    // Get the absolute URL
+    var absoluteURL = resolveURL(url, schema);
+
+    // Try to find a file with this URL
+    for (var i = 0; i < this.length; i++) {
+      var file = this[i];
+      if (file.url === absoluteURL) {
+        return file;
+      }
+    }
+
+    // If we get here, then no files matched the URL
+    throw ono('Unable to get %s. \nThe schema does not include this file.', absoluteURL);
   };
 
   return files;
 }
 
-},{}],4:[function(require,module,exports){
-/* eslint no-unused-vars:off */
+/**
+ * Resolves the given URL to an absolute URL.
+ *
+ * @param {string|File} url
+ * An absolute URL, or a relative URL (relative to the schema's root file), or a {@link File} object
+ *
+ * @param {Schema} schema
+ * @returns {boolean}
+ */
+function resolveURL (url, schema) {
+  if (url instanceof File) {
+    // The URL is already absolute
+    return url.url;
+  }
+
+  return schema.plugins.resolveURL({ from: schema.rootURL, to: url });
+}
+
+},{"./File":2,"ono":36}],4:[function(require,module,exports){
 'use strict';
 
-var ono = require('ono');
 var Config = require('../Config');
 var PluginManager = require('../PluginManager');
 var read = require('./read');
@@ -399,7 +455,7 @@ function callAsync (fn, error, schema) {
   }, 0);
 }
 
-},{"../Config":1,"../PluginManager":13,"./normalizeArgs":5,"./read":6,"ono":35}],5:[function(require,module,exports){
+},{"../Config":1,"../PluginManager":14,"./normalizeArgs":5,"./read":6}],5:[function(require,module,exports){
 'use strict';
 
 var ono = require('ono');
@@ -471,15 +527,15 @@ function normalizeArgs (args) {
   };
 }
 
-},{"../Config":1,"ono":35}],6:[function(require,module,exports){
+},{"../Config":1,"ono":36}],6:[function(require,module,exports){
 'use strict';
 
 var Schema = require('../Schema');
 var File = require('../File');
 var safeCall = require('../../util/safeCall');
 var stripHash = require('../../util/stripHash');
-var typeOf = require('../../util/typeOf');
 var __internal = require('../../util/internal');
+var resolveFileReferences = require('./resolveFileReferences');
 
 var STATE_READING = 1;
 var STATE_READ = 2;
@@ -572,19 +628,9 @@ function decodeFile (file, callback) {
  */
 function parseFile (file, callback) {
   file.data = file.schema.plugins.parseFile({ file: file });
-  safeCall(resolveRefs, file, callback);
-}
 
-/**
- * Resolves all JSON References ($ref) in the given file, and adds any new files to the schema.
- *
- * @param {File} file
- * @param {function} callback
- */
-function resolveRefs (file, callback) {
-  if (typeOf(file.data).isPOJO) {
-    // TODO: Resolve all $refs in the file. Add File objects to the schema
-  }
+  // Find all JSON References ($ref) to other files, and add new File objects to the schema
+  resolveFileReferences(file);
 
   safeCall(readReferencedFiles, file.schema, callback);
 }
@@ -616,21 +662,106 @@ function readReferencedFiles (schema, callback) {
     return callback(null, schema);
   }
 
-  // Start reading any files that haven't been read yet
-  for (i = 0; i < filesToRead.length; i++) {
+  // In sync mode, just read the next file.
+  // In async mode, start reading all files in the queue
+  var numberOfFilesToRead = schema.config.sync ? 1 : filesToRead.length;
+
+  for (i = 0; i < numberOfFilesToRead; i++) {
     file = filesToRead[i];
     safeCall(readFile, file, callback);
   }
+
 }
 
-},{"../../util/internal":25,"../../util/safeCall":29,"../../util/stripHash":31,"../../util/typeOf":32,"../File":2,"../Schema":14}],7:[function(require,module,exports){
-/* eslint no-unused-vars:off */
+},{"../../util/internal":26,"../../util/safeCall":30,"../../util/stripHash":32,"../File":2,"../Schema":15,"./resolveFileReferences":7}],7:[function(require,module,exports){
+'use strict';
+
+var File = require('../File');
+var typeOf = require('../../util/typeOf');
+
+module.exports = resolveFileReferences;
+
+/**
+ * Resolves all JSON References ($ref) to other files, and adds new {@link File} objects
+ * to the schema as needed.
+ *
+ * @param {File} file - The file to search for JSON References
+ */
+function resolveFileReferences (file) {
+  // Start crawling at the root of the file
+  crawl(file.data, file);
+}
+
+/**
+ * Recursively crawls the given value, and resolves any external JSON References.
+ *
+ * @param {*} obj - The value to crawl. If it's not an object or array, it will be ignored.
+ * @param {File} file - The file that the value is part of
+ */
+function crawl (obj, file) {
+  var type = typeOf(obj);
+
+  if (!type.isPOJO && !type.isArray) {
+    return;
+  }
+
+  if (type.isPOJO && isFileReference(obj)) {
+    // We found a file reference, so resolve it
+    resolveFileReference(obj.$ref, file);
+  }
+
+  // Crawl this POJO or Array, looking for nested JSON References
+  //
+  // NOTE: According to the spec, JSON References should not have any properties other than "$ref".
+  //       However, in practice, many schema authors DO add additional properties. Because of this,
+  //       we crawl JSON Reference objects just like normal POJOs. If the schema author has added
+  //       additional properties, then they have opted-into this non-spec-compliant behavior.
+  var keys = Object.keys(obj);
+
+  for (var i = 0; i < keys.length; i++) {
+    var key = keys[i];
+    var value = obj[key];
+    crawl(value, file);
+  }
+}
+
+/**
+ * Determines whether the given value is a JSON Reference that points to a file
+ * (as opposed to an internal reference, which points to a location within its own file).
+ *
+ * @param {*} value - The value to inspect
+ * @returns {boolean}
+ */
+function isFileReference (value) {
+  return typeof value.$ref === 'string' && value.$ref[0] !== '#';
+}
+
+/**
+ * Resolves the given JSON Reference URL against the specified file, and adds a new {@link File}
+ * object to the schema if necessary.
+ *
+ * @param {string} url - The JSON Reference URL (may be absolute or relative)
+ * @param {File} file - The file that the JSON Reference is in
+ */
+function resolveFileReference (url, file) {
+  var schema = file.schema;
+  var newFile = new File(schema);
+
+  // Resolve the new file's absolute URL
+  newFile.url = schema.plugins.resolveURL({ from: file.url, to: url });
+
+  // Add this file to the schema, unless it already exists
+  if (!schema.files.exists(newFile)) {
+    schema.files.push(newFile);
+  }
+}
+
+},{"../../util/typeOf":33,"../File":2}],8:[function(require,module,exports){
 'use strict';
 
 var ono = require('ono');
 var __internal = require('../../util/internal');
 var validatePlugins = require('./validatePlugins');
-var omit = require('../../util/omit');
 var callSyncPlugin = require('./callSyncPlugin');
 var callAsyncPlugin = require('./callAsyncPlugin');
 
@@ -779,12 +910,10 @@ PluginHelper.prototype.parseFile = function parseFile (args) {
 };
 
 /**
- * Allows the {@link PluginHelper} to be safely serialized as JSON by removing circular references.
- *
- * @returns {object}
+ * Serializes the {@link PluginHelper}
  */
 PluginHelper.prototype.toJSON = function toJSON () {
-  return omit(this, __internal);
+  return this[__internal].plugins;
 };
 
 /**
@@ -799,7 +928,7 @@ function sortByPriority (pluginA, pluginB) {
   return pluginB.priority - pluginA.priority;
 }
 
-},{"../../util/internal":25,"../../util/omit":28,"./callAsyncPlugin":8,"./callSyncPlugin":9,"./validatePlugins":12,"ono":35}],8:[function(require,module,exports){
+},{"../../util/internal":26,"./callAsyncPlugin":9,"./callSyncPlugin":10,"./validatePlugins":13,"ono":36}],9:[function(require,module,exports){
 'use strict';
 
 var ono = require('ono');
@@ -880,7 +1009,7 @@ function callNextPlugin (plugins, methodName, args, callback) {
   }
 }
 
-},{"../../util/internal":25,"../../util/safeCall":29,"./filterByMethod":10,"ono":35}],9:[function(require,module,exports){
+},{"../../util/internal":26,"../../util/safeCall":30,"./filterByMethod":11,"ono":36}],10:[function(require,module,exports){
 'use strict';
 
 var ono = require('ono');
@@ -955,7 +1084,7 @@ function callNextPlugin (plugins, methodName, args) {
   }
 }
 
-},{"../../util/internal":25,"./filterByMethod":10,"ono":35}],10:[function(require,module,exports){
+},{"../../util/internal":26,"./filterByMethod":11,"ono":36}],11:[function(require,module,exports){
 'use strict';
 
 module.exports = filterByMethod;
@@ -972,7 +1101,7 @@ function filterByMethod (methodName) {
   };
 }
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 'use strict';
 
 var ono = require('ono');
@@ -994,7 +1123,7 @@ function validatePlugin (plugin) {
   }
 }
 
-},{"../../util/typeOf":32,"ono":35}],12:[function(require,module,exports){
+},{"../../util/typeOf":33,"ono":36}],13:[function(require,module,exports){
 'use strict';
 
 var ono = require('ono');
@@ -1023,7 +1152,7 @@ function validatePlugins (plugins) {
   }
 }
 
-},{"../../util/typeOf":32,"./validatePlugin":11,"ono":35}],13:[function(require,module,exports){
+},{"../../util/typeOf":33,"./validatePlugin":12,"ono":36}],14:[function(require,module,exports){
 'use strict';
 
 var ono = require('ono');
@@ -1107,7 +1236,7 @@ function validatePriority (priority) {
   }
 }
 
-},{"../util/deepClone":24,"../util/internal":25,"../util/typeOf":32,"./PluginHelper/validatePlugin":11,"./PluginHelper/validatePlugins":12,"ono":35}],14:[function(require,module,exports){
+},{"../util/deepClone":25,"../util/internal":26,"../util/typeOf":33,"./PluginHelper/validatePlugin":12,"./PluginHelper/validatePlugins":13,"ono":36}],15:[function(require,module,exports){
 'use strict';
 
 var Config = require('./Config');
@@ -1147,7 +1276,7 @@ function Schema (config, plugins) {
    * @type {File[]}
    * @readonly
    */
-  this.files = new FileArray();
+  this.files = new FileArray(this);
 
   /**
    * Indicates whether the schema contains any circular references.
@@ -1181,7 +1310,7 @@ Object.defineProperties(Schema.prototype, {
    *
    * @type {string|null}
    */
-  rootUrl: {
+  rootURL: {
     configurable: true,
     enumerable: true,
     get: function () {
@@ -1260,7 +1389,7 @@ Schema.prototype.set = function (pointer, value) {                              
   // TODO: pointer can be a JSON Pointer (starting with a /) or a URL
 };
 
-},{"./Config":1,"./FileArray":3,"./PluginHelper/PluginHelper":7}],15:[function(require,module,exports){
+},{"./Config":1,"./FileArray":3,"./PluginHelper/PluginHelper":8}],16:[function(require,module,exports){
 'use strict';
 
 var PluginManager = require('./api/PluginManager');
@@ -1276,7 +1405,7 @@ PluginManager.defaults.push(
 
 module.exports = require('./exports');
 
-},{"./api/PluginManager":13,"./exports":16,"./plugins/ArrayDecoderPlugin":17,"./plugins/BrowserUrlPlugin":18,"./plugins/JsonPlugin":19,"./plugins/TextDecoderPlugin":20,"./plugins/XMLHttpRequestPlugin":21}],16:[function(require,module,exports){
+},{"./api/PluginManager":14,"./exports":17,"./plugins/ArrayDecoderPlugin":18,"./plugins/BrowserUrlPlugin":19,"./plugins/JsonPlugin":20,"./plugins/TextDecoderPlugin":21,"./plugins/XMLHttpRequestPlugin":22}],17:[function(require,module,exports){
 'use strict';
 
 var JsonSchemaLib = require('./api/JsonSchemaLib/JsonSchemaLib');
@@ -1343,7 +1472,7 @@ function createJsonSchemaLib (config, plugins) {
   return new JsonSchemaLib(config, plugins);
 }
 
-},{"./api/File":2,"./api/JsonSchemaLib/JsonSchemaLib":4,"./api/Schema":14}],17:[function(require,module,exports){
+},{"./api/File":2,"./api/JsonSchemaLib/JsonSchemaLib":4,"./api/Schema":15}],18:[function(require,module,exports){
 'use strict';
 
 var isTypedArray = require('../util/isTypedArray');
@@ -1411,7 +1540,7 @@ function stripBOM (str) {
   return str;
 }
 
-},{"../util/isTypedArray":26}],18:[function(require,module,exports){
+},{"../util/isTypedArray":27}],19:[function(require,module,exports){
 'use strict';
 
 var stripHash = require('../util/stripHash');
@@ -1563,7 +1692,7 @@ function stripQuery (url) {
   return url;
 }
 
-},{"../util/stripHash":31}],19:[function(require,module,exports){
+},{"../util/stripHash":32}],20:[function(require,module,exports){
 'use strict';
 
 // Matches "application/json", "text/json", "application/hal+json", etc.
@@ -1622,7 +1751,7 @@ function isJsonFile (file) {
     );
 }
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 'use strict';
 
 var isTypedArray = require('../util/isTypedArray');
@@ -1675,7 +1804,7 @@ module.exports = {
   },
 };
 
-},{"../util/isTypedArray":26}],21:[function(require,module,exports){
+},{"../util/isTypedArray":27}],22:[function(require,module,exports){
 'use strict';
 
 var ono = require('ono');
@@ -1867,7 +1996,7 @@ function parseResponseHeaders (headers) {
   return parsed;
 }
 
-},{"../util/safeCall":29,"../util/setHttpMetadata":30,"ono":35}],22:[function(require,module,exports){
+},{"../util/safeCall":30,"../util/setHttpMetadata":31,"ono":36}],23:[function(require,module,exports){
 'use strict';
 
 var ono = require('ono');
@@ -1881,7 +2010,7 @@ else {
   };
 }
 
-},{"ono":35}],23:[function(require,module,exports){
+},{"ono":36}],24:[function(require,module,exports){
 'use strict';
 
 if (typeof Symbol === 'function') {
@@ -1893,7 +2022,7 @@ else {
   };
 }
 
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 'use strict';
 
 var typeOf = require('./typeOf');
@@ -1943,7 +2072,7 @@ function deepClone (value) {
   }
 }
 
-},{"./typeOf":32}],25:[function(require,module,exports){
+},{"./typeOf":33}],26:[function(require,module,exports){
 'use strict';
 
 var Symbol = require('./Symbol');
@@ -1955,7 +2084,7 @@ var Symbol = require('./Symbol');
  */
 module.exports = Symbol('__internal');
 
-},{"./Symbol":23}],26:[function(require,module,exports){
+},{"./Symbol":24}],27:[function(require,module,exports){
 'use strict';
 
 var supportedDataTypes = getSupportedDataTypes();
@@ -2024,7 +2153,7 @@ function getSupportedDataTypes () {
   return types;
 }
 
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 'use strict';
 
 module.exports = lowercase;
@@ -2044,7 +2173,7 @@ function lowercase (str) {
   }
 }
 
-},{}],28:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 'use strict';
 
 module.exports = omit;
@@ -2073,7 +2202,7 @@ function omit (obj, props) {
   return newObj;
 }
 
-},{}],29:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 'use strict';
 
 module.exports = safeCall;
@@ -2116,7 +2245,7 @@ function safeCall (fn, args, callback) {
   }
 }
 
-},{"ono":35}],30:[function(require,module,exports){
+},{"ono":36}],31:[function(require,module,exports){
 'use strict';
 
 var contentType = require('content-type');
@@ -2142,7 +2271,7 @@ function setHttpMetadata (file, res) {
   }
 }
 
-},{"../util/lowercase":27,"content-type":33}],31:[function(require,module,exports){
+},{"../util/lowercase":28,"content-type":34}],32:[function(require,module,exports){
 'use strict';
 
 module.exports = stripHash;
@@ -2172,7 +2301,7 @@ function stripHash (url) {
   return url;
 }
 
-},{}],32:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 'use strict';
 
 module.exports = typeOf;
@@ -2212,7 +2341,7 @@ function typeOf (value) {
   return type;
 }
 
-},{}],33:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 /*!
  * content-type
  * Copyright(c) 2015 Douglas Christopher Wilson
@@ -2430,7 +2559,7 @@ function ContentType(type) {
   this.type = type
 }
 
-},{}],34:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 function format(fmt) {
   var re = /(%?)(%([jds]))/g
     , args = Array.prototype.slice.call(arguments, 1);
@@ -2469,7 +2598,7 @@ function format(fmt) {
 
 module.exports = format;
 
-},{}],35:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 'use strict';
 
 var format = require('format-util');
@@ -2772,6 +2901,6 @@ function lazyPopStack (error) {
   });
 }
 
-},{"format-util":34}]},{},[15])(15)
+},{"format-util":35}]},{},[16])(16)
 });
 //# sourceMappingURL=json-schema-lib.js.map

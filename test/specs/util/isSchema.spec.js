@@ -40,7 +40,7 @@
         args.next();
       }
 
-      expect(callCounter).to.equal(4);
+      expect(callCounter).to.equal(32);
       done();
     });
 

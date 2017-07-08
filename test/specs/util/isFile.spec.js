@@ -43,7 +43,7 @@
         args.next();
       }
 
-      expect(callCounter).to.equal(3);
+      expect(callCounter).to.equal(24);
       done();
     });
 
