@@ -1,0 +1,23 @@
+{
+  "title": "Person",
+  "type": "object",
+  "required": [
+    "firstName",
+    "lastName",
+    "dob"
+  ],
+  "properties": {
+    "firstName": {
+      "$ref": "types.json#/definitions/name"
+    },
+    "lastName": {
+      "$ref": "types.json#/definitions/name"
+    },
+    "dob": {
+      "$ref": "types.json#/definitions/date"
+    },
+    "age": {
+      "$ref": "types.json#/definitions/positiveInteger"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "definitions": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "positiveInteger": {
+      "type": "integer",
+      "min": 1
+    }
+  }
+}

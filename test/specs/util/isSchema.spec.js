@@ -31,7 +31,7 @@
       });
 
       // Read the schema, using the dummy plugin
-      instance.readSync(path.rel('schemas/external-refs-simple/vehicle.json'));
+      instance.readSync(path.rel('schemas/external-refs-single/person.json'));
 
       // Make sure the `schema` argument of each plugin method passes `util.isSchema()`
       function pluginMethod (args) {
@@ -40,7 +40,7 @@
         args.next();
       }
 
-      expect(callCounter).to.equal(32);
+      expect(callCounter).to.equal(11);
       done();
     });
 

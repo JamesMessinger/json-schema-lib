@@ -6,7 +6,7 @@
   describe('util.isFile()', function () {
 
     it('should return true if passed a File object', function (done) {
-      var schema = jsonSchemaLib.readSync(path.rel('schemas/external-refs-simple/vehicle.json'));
+      var schema = jsonSchemaLib.readSync(path.rel('schemas/external-refs-multiple/vehicle.json'));
 
       schema.files.forEach(function (file) {
         expect(util.isFile(file)).to.be.true;
@@ -34,7 +34,7 @@
       });
 
       // Read the schema, using the dummy plugin
-      instance.readSync(path.rel('schemas/external-refs-simple/vehicle.json'));
+      instance.readSync(path.rel('schemas/external-refs-single/person.json'));
 
       // Make sure the `schema` argument of each plugin method passes `util.isFile()`
       function pluginMethod (args) {
@@ -43,7 +43,7 @@
         args.next();
       }
 
-      expect(callCounter).to.equal(24);
+      expect(callCounter).to.equal(6);
       done();
     });
 
