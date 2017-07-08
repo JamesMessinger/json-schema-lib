@@ -590,19 +590,18 @@ function readFile (file, callback) {
   file[__internal].state = STATE_READING;
 
   if (schema.config.sync) {
-    file.data = schema.plugins.readFileSync({ file: file });
-    doneReading(null, file.data);
+    schema.plugins.readFileSync({ file: file });
+    doneReading(null);
   }
   else {
     schema.plugins.readFileAsync({ file: file }, doneReading);
   }
 
-  function doneReading (err, data) {
+  function doneReading (err) {
     if (err) {
       callback(err);
     }
     else {
-      file.data = data;
       file[__internal].state = STATE_READ;
       safeCall(decodeFile, file, callback);
     }
@@ -616,7 +615,7 @@ function readFile (file, callback) {
  * @param {function} callback
  */
 function decodeFile (file, callback) {
-  file.data = file.schema.plugins.decodeFile({ file: file });
+  file.schema.plugins.decodeFile({ file: file });
   safeCall(parseFile, file, callback);
 }
 
@@ -627,7 +626,7 @@ function decodeFile (file, callback) {
  * @param {function} callback
  */
 function parseFile (file, callback) {
-  file.data = file.schema.plugins.parseFile({ file: file });
+  file.schema.plugins.parseFile({ file: file });
 
   // Find all JSON References ($ref) to other files, and add new File objects to the schema
   resolveFileReferences(file);
@@ -827,7 +826,6 @@ PluginHelper.prototype.resolveURL = function resolveURL (args) {
  * Synchronously reads the given file from its source (e.g. web server, filesystem, etc.)
  *
  * @param {File} args.file - The {@link File} to read
- * @returns {string|ArrayBuffer|Buffer}
  */
 PluginHelper.prototype.readFileSync = function readFileSync (args) {
   try {
@@ -837,7 +835,8 @@ PluginHelper.prototype.readFileSync = function readFileSync (args) {
       throw ono('Error in readFileSync: No plugin was able to read the file');
     }
     else {
-      return handled.result;
+      // The file was read successfully, so set the file's data
+      args.file.data = handled.result;
     }
   }
   catch (err) {
@@ -866,7 +865,12 @@ PluginHelper.prototype.readFileAsync = function readFileAsync (args, callback) {
       callback(err);
     }
     else {
-      callback(null, handled.result);
+      if (handled.plugin) {
+        // The file was read successfully, so set the file's data
+        args.file.data = handled.result;
+      }
+
+      callback(null);
     }
   });
 };
@@ -883,7 +887,10 @@ PluginHelper.prototype.decodeFile = function decodeFile (args) {
 
     // NOTE: It's ok if no plugin handles this method.
     // The file data will just remain in its "raw" format.
-    return handled.result;
+    if (handled.plugin) {
+      // The file was decoded successfully, so update the file's data
+      args.file.data = handled.result;
+    }
   }
   catch (err) {
     throw ono(err, 'Unable to parse %s', args.file.url);
@@ -902,7 +909,10 @@ PluginHelper.prototype.parseFile = function parseFile (args) {
 
     // NOTE: It's ok if no plugin handles this method.
     // The file data will just remain in its "raw" format.
-    return handled.result;
+    if (handled.plugin) {
+      // The file was parsed successfully, so update the file's data
+      args.file.data = handled.result;
+    }
   }
   catch (err) {
     throw ono(err, 'Unable to parse %s', args.file.url);
