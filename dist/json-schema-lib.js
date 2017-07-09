@@ -20,6 +20,7 @@ module.exports = Config;
  *
  * @param {object} [config] - User-specified config. These override the defaults.
  * @param {object} [defaultConfig] - The default config to use instead of {@link Config.defaults}
+ *
  * @class
  */
 function Config (config, defaultConfig) {
@@ -98,7 +99,7 @@ function validateConfig (config) {
   }
 }
 
-},{"../util/Promise":23,"../util/deepClone":25,"../util/typeOf":33,"ono":36}],2:[function(require,module,exports){
+},{"../util/Promise":23,"../util/deepClone":26,"../util/typeOf":34,"ono":37}],2:[function(require,module,exports){
 'use strict';
 
 var omit = require('../util/omit');
@@ -182,11 +183,13 @@ File.prototype.toJSON = function toJSON () {
   return omit(this, 'schema', __internal);
 };
 
-},{"../util/internal":26,"../util/omit":29}],3:[function(require,module,exports){
+},{"../util/internal":27,"../util/omit":30}],3:[function(require,module,exports){
 'use strict';
 
 var ono = require('ono');
 var File = require('./File');
+var assign = require('../util/assign');
+var __internal = require('../util/internal');
 
 module.exports = FileArray;
 
@@ -194,69 +197,84 @@ module.exports = FileArray;
  * An array of {@link File} objects, with some helper methods.
  *
  * @param {Schema} schema - The JSON Schema that these files are part of
- * @returns {array}
+ *
+ * @class
+ * @extends Array
  */
 function FileArray (schema) {
-  var files = [];
+  var fileArray = [];
 
   /**
-   * Determines whether a given file is in the array.
+   * Internal stuff. Use at your own risk!
    *
-   * @param {string|File} url
-   * An absolute URL, or a relative URL (relative to the schema's root file), or a {@link File} object
-   *
-   * @returns {boolean}
+   * @private
    */
-  files.exists = function exists (url) {
-    if (this.length === 0) {
-      return false;
-    }
-
-    // Get the absolute URL
-    var absoluteURL = resolveURL(url, schema);
-
-    // Try to find a file with this URL
-    for (var i = 0; i < this.length; i++) {
-      var file = this[i];
-      if (file.url === absoluteURL) {
-        return true;
-      }
-    }
-
-    // If we get here, thne no files matched the URL
-    return false;
+  fileArray[__internal] = {
+    /**
+     * A reference to the {@link Schema} object
+     */
+    schema: schema,
   };
 
-  /**
-   * Returns the given file in the array. Throws an error if not found.
-   *
-   * @param {string|File} url
-   * An absolute URL, or a relative URL (relative to the schema's root file), or a {@link File} object
-   *
-   * @returns {File}
-   */
-  files.get = function get (url) {
-    if (this.length === 0) {
-      throw ono('Unable to get %s. \nThe schema is empty.', url);
-    }
-
-    // Get the absolute URL
-    var absoluteURL = resolveURL(url, schema);
-
-    // Try to find a file with this URL
-    for (var i = 0; i < this.length; i++) {
-      var file = this[i];
-      if (file.url === absoluteURL) {
-        return file;
-      }
-    }
-
-    // If we get here, then no files matched the URL
-    throw ono('Unable to get %s. \nThe schema does not include this file.', absoluteURL);
-  };
-
-  return files;
+  // Return an array that "inherits" from FileArray
+  return assign(fileArray, FileArray.prototype);
 }
+
+/**
+ * Determines whether a given file is in the array.
+ *
+ * @param {string|File} url
+ * An absolute URL, or a relative URL (relative to the schema's root file), or a {@link File} object
+ *
+ * @returns {boolean}
+ */
+FileArray.prototype.exists = function exists (url) {
+  if (this.length === 0) {
+    return false;
+  }
+
+  // Get the absolute URL
+  var absoluteURL = resolveURL(url, this[__internal].schema);
+
+  // Try to find a file with this URL
+  for (var i = 0; i < this.length; i++) {
+    var file = this[i];
+    if (file.url === absoluteURL) {
+      return true;
+    }
+  }
+
+  // If we get here, thne no files matched the URL
+  return false;
+};
+
+/**
+ * Returns the given file in the array. Throws an error if not found.
+ *
+ * @param {string|File} url
+ * An absolute URL, or a relative URL (relative to the schema's root file), or a {@link File} object
+ *
+ * @returns {File}
+ */
+FileArray.prototype.get = function get (url) {
+  if (this.length === 0) {
+    throw ono('Unable to get %s. \nThe schema is empty.', url);
+  }
+
+  // Get the absolute URL
+  var absoluteURL = resolveURL(url, this[__internal].schema);
+
+  // Try to find a file with this URL
+  for (var i = 0; i < this.length; i++) {
+    var file = this[i];
+    if (file.url === absoluteURL) {
+      return file;
+    }
+  }
+
+  // If we get here, then no files matched the URL
+  throw ono('Unable to get %s. \nThe schema does not include this file.', absoluteURL);
+};
 
 /**
  * Resolves the given URL to an absolute URL.
@@ -276,7 +294,7 @@ function resolveURL (url, schema) {
   return schema.plugins.resolveURL({ from: schema.rootURL, to: url });
 }
 
-},{"./File":2,"ono":36}],4:[function(require,module,exports){
+},{"../util/assign":25,"../util/internal":27,"./File":2,"ono":37}],4:[function(require,module,exports){
 'use strict';
 
 var Config = require('../Config');
@@ -539,7 +557,7 @@ function normalizeArgs (args) {
   };
 }
 
-},{"../Config":1,"ono":36}],6:[function(require,module,exports){
+},{"../Config":1,"ono":37}],6:[function(require,module,exports){
 'use strict';
 
 var Schema = require('../Schema');
@@ -567,7 +585,7 @@ module.exports = read;
  */
 function read (url, data, config, callback) {
   // Create a new JSON Schema and root file
-  var schema = new Schema(config, this.plugins.toJSON());
+  var schema = new Schema(config, this.plugins);
   var rootFile = new File(schema);
   schema.files.push(rootFile);
 
@@ -684,7 +702,7 @@ function readReferencedFiles (schema, callback) {
 
 }
 
-},{"../../util/internal":26,"../../util/safeCall":30,"../../util/stripHash":32,"../File":2,"../Schema":15,"./resolveFileReferences":7}],7:[function(require,module,exports){
+},{"../../util/internal":27,"../../util/safeCall":31,"../../util/stripHash":33,"../File":2,"../Schema":15,"./resolveFileReferences":7}],7:[function(require,module,exports){
 'use strict';
 
 var File = require('../File');
@@ -771,10 +789,11 @@ function resolveFileReference (url, file) {
   }
 }
 
-},{"../../util/stripHash":32,"../../util/typeOf":33,"../File":2}],8:[function(require,module,exports){
+},{"../../util/stripHash":33,"../../util/typeOf":34,"../File":2}],8:[function(require,module,exports){
 'use strict';
 
 var ono = require('ono');
+var assign = require('../../util/assign');
 var __internal = require('../../util/internal');
 var validatePlugins = require('./validatePlugins');
 var callSyncPlugin = require('./callSyncPlugin');
@@ -787,27 +806,31 @@ module.exports = PluginHelper;
  *
  * @param {object[]|null} plugins - The plugins to use
  * @param {Schema} schema - The {@link Schema} to apply the plugins to
+ *
+ * @class
+ * @extends Array
  */
 function PluginHelper (plugins, schema) {
   validatePlugins(plugins);
   plugins = plugins || [];
+
+  // Clone the array of plugins, and sort by priority
+  var pluginHelper = plugins.slice().sort(sortByPriority);
 
   /**
    * Internal stuff. Use at your own risk!
    *
    * @private
    */
-  this[__internal] = {
+  pluginHelper[__internal] = {
     /**
      * A reference to the {@link Schema} object
      */
     schema: schema,
-
-    /**
-     * The array of plugins, sorted by priority
-     */
-    plugins: plugins.slice().sort(sortByPriority),
   };
+
+  // Return an array that "inherits" from PluginHelper
+  return assign(pluginHelper, PluginHelper.prototype);
 }
 
 /**
@@ -936,15 +959,6 @@ PluginHelper.prototype.parseFile = function parseFile (args) {
 };
 
 /**
- * Serializes the {@link PluginHelper}
- *
- * @returns {object}
- */
-PluginHelper.prototype.toJSON = function toJSON () {
-  return this[__internal].plugins;
-};
-
-/**
  * Used to sort plugins by priority, so that plugins with higher piority come first
  * in the __plugins array.
  *
@@ -956,7 +970,7 @@ function sortByPriority (pluginA, pluginB) {
   return (pluginB.priority || 0) - (pluginA.priority || 0);
 }
 
-},{"../../util/internal":26,"./callAsyncPlugin":9,"./callSyncPlugin":10,"./validatePlugins":13,"ono":36}],9:[function(require,module,exports){
+},{"../../util/assign":25,"../../util/internal":27,"./callAsyncPlugin":9,"./callSyncPlugin":10,"./validatePlugins":13,"ono":37}],9:[function(require,module,exports){
 'use strict';
 
 var ono = require('ono');
@@ -975,7 +989,7 @@ module.exports = callAsyncPlugin;
  * @param {function} callback - The callback to call when the method finishes
  */
 function callAsyncPlugin (pluginHelper, methodName, args, callback) {
-  var plugins = pluginHelper[__internal].plugins.filter(filterByMethod(methodName));
+  var plugins = pluginHelper.filter(filterByMethod(methodName));
   args.schema = pluginHelper[__internal].schema;
   args.config = args.schema.config;
 
@@ -1037,7 +1051,7 @@ function callNextPlugin (plugins, methodName, args, callback) {
   }
 }
 
-},{"../../util/internal":26,"../../util/safeCall":30,"./filterByMethod":11,"ono":36}],10:[function(require,module,exports){
+},{"../../util/internal":27,"../../util/safeCall":31,"./filterByMethod":11,"ono":37}],10:[function(require,module,exports){
 'use strict';
 
 var ono = require('ono');
@@ -1058,7 +1072,7 @@ module.exports = callSyncPlugin;
  * object will contain a reference to the plugin, and the result that was returned by the plugin.
  */
 function callSyncPlugin (pluginHelper, methodName, args) {
-  var plugins = pluginHelper[__internal].plugins.filter(filterByMethod(methodName));
+  var plugins = pluginHelper.filter(filterByMethod(methodName));
   args.schema = pluginHelper[__internal].schema;
   args.config = args.schema.config;
 
@@ -1112,7 +1126,7 @@ function callNextPlugin (plugins, methodName, args) {
   }
 }
 
-},{"../../util/internal":26,"./filterByMethod":11,"ono":36}],11:[function(require,module,exports){
+},{"../../util/internal":27,"./filterByMethod":11,"ono":37}],11:[function(require,module,exports){
 'use strict';
 
 module.exports = filterByMethod;
@@ -1151,7 +1165,7 @@ function validatePlugin (plugin) {
   }
 }
 
-},{"../../util/typeOf":33,"ono":36}],13:[function(require,module,exports){
+},{"../../util/typeOf":34,"ono":37}],13:[function(require,module,exports){
 'use strict';
 
 var ono = require('ono');
@@ -1180,12 +1194,12 @@ function validatePlugins (plugins) {
   }
 }
 
-},{"../../util/typeOf":33,"./validatePlugin":12,"ono":36}],14:[function(require,module,exports){
+},{"../../util/typeOf":34,"./validatePlugin":12,"ono":37}],14:[function(require,module,exports){
 'use strict';
 
 var ono = require('ono');
 var typeOf = require('../util/typeOf');
-var __internal = require('../util/internal');
+var assign = require('../util/assign');
 var deepClone = require('../util/deepClone');
 var validatePlugin = require('./PluginHelper/validatePlugin');
 var validatePlugins = require('./PluginHelper/validatePlugins');
@@ -1196,22 +1210,19 @@ module.exports = PluginManager;
  * Manages the plugins that are used by a {@link JsonSchemaLib} instance.
  *
  * @param {object[]} [plugins] - The initial plugins to load
+ *
+ * @class
+ * @extends Array
  */
 function PluginManager (plugins) {
   validatePlugins(plugins);
   plugins = plugins || PluginManager.defaults;
 
-  /**
-   * Internal stuff. Use at your own risk!
-   *
-   * @private
-   */
-  this[__internal] = {
-    /**
-     * The array of plugins
-     */
-    plugins: plugins.map(deepClone),
-  };
+  // Deep-clone the plugins, in case the same plugin is used for different JsonSchemaLib instances
+  var pluginManager = plugins.map(deepClone);
+
+  // Return an array that "inherits" from PluginManager
+  return assign(pluginManager, PluginManager.prototype);
 }
 
 /**
@@ -1238,16 +1249,7 @@ PluginManager.prototype.use = function use (plugin, priority) {
   plugin = deepClone(plugin);
   plugin.priority = priority || plugin.priority;
 
-  this[__internal].plugins.push(plugin);
-};
-
-/**
- * Serializes the {@link PluginManager}
- *
- * @returns {object}
- */
-PluginManager.prototype.toJSON = function toJSON () {
-  return this[__internal].plugins;
+  this.push(plugin);
 };
 
 /**
@@ -1264,7 +1266,7 @@ function validatePriority (priority) {
   }
 }
 
-},{"../util/deepClone":25,"../util/internal":26,"../util/typeOf":33,"./PluginHelper/validatePlugin":12,"./PluginHelper/validatePlugins":13,"ono":36}],15:[function(require,module,exports){
+},{"../util/assign":25,"../util/deepClone":26,"../util/typeOf":34,"./PluginHelper/validatePlugin":12,"./PluginHelper/validatePlugins":13,"ono":37}],15:[function(require,module,exports){
 'use strict';
 
 var Config = require('./Config');
@@ -1559,7 +1561,7 @@ function stripBOM (str) {
   return str;
 }
 
-},{"../util/isTypedArray":27}],19:[function(require,module,exports){
+},{"../util/isTypedArray":28}],19:[function(require,module,exports){
 'use strict';
 
 var stripHash = require('../util/stripHash');
@@ -1711,7 +1713,7 @@ function stripQuery (url) {
   return url;
 }
 
-},{"../util/stripHash":32}],20:[function(require,module,exports){
+},{"../util/stripHash":33}],20:[function(require,module,exports){
 'use strict';
 
 // Matches "application/json", "text/json", "application/hal+json", etc.
@@ -1823,7 +1825,7 @@ module.exports = {
   },
 };
 
-},{"../util/isTypedArray":27}],22:[function(require,module,exports){
+},{"../util/isTypedArray":28}],22:[function(require,module,exports){
 'use strict';
 
 var ono = require('ono');
@@ -2015,7 +2017,7 @@ function parseResponseHeaders (headers) {
   return parsed;
 }
 
-},{"../util/safeCall":30,"../util/setHttpMetadata":31,"ono":36}],23:[function(require,module,exports){
+},{"../util/safeCall":31,"../util/setHttpMetadata":32,"ono":37}],23:[function(require,module,exports){
 'use strict';
 
 var ono = require('ono');
@@ -2029,7 +2031,7 @@ else {
   };
 }
 
-},{"ono":36}],24:[function(require,module,exports){
+},{"ono":37}],24:[function(require,module,exports){
 'use strict';
 
 if (typeof Symbol === 'function') {
@@ -2044,27 +2046,32 @@ else {
 },{}],25:[function(require,module,exports){
 'use strict';
 
-var typeOf = require('./typeOf');
-
-module.exports = deepClone;
-module.exports.assign = deepAssign;
+module.exports = Object.assign || assign;
 
 /**
- * Deeply assigns the properties of the source object to the target object
+ * Assigns the properties of the source object to the target object
  *
  * @param {object} target
  * @param {object} source
  */
-function deepAssign (target, source) {
+function assign (target, source) {
   var keys = Object.keys(source);
 
   for (var i = 0; i < keys.length; i++) {
     var key = keys[i];
-    target[key] = deepClone(source[key]);
+    target[key] = source[key];
   }
 
   return target;
 }
+
+},{}],26:[function(require,module,exports){
+'use strict';
+
+var typeOf = require('./typeOf');
+
+module.exports = deepClone;
+module.exports.assign = deepAssign;
 
 /**
  * Returns a deep clone of the given value
@@ -2091,7 +2098,24 @@ function deepClone (value) {
   }
 }
 
-},{"./typeOf":33}],26:[function(require,module,exports){
+/**
+ * Deeply assigns the properties of the source object to the target object
+ *
+ * @param {object} target
+ * @param {object} source
+ */
+function deepAssign (target, source) {
+  var keys = Object.keys(source);
+
+  for (var i = 0; i < keys.length; i++) {
+    var key = keys[i];
+    target[key] = deepClone(source[key]);
+  }
+
+  return target;
+}
+
+},{"./typeOf":34}],27:[function(require,module,exports){
 'use strict';
 
 var Symbol = require('./Symbol');
@@ -2103,7 +2127,7 @@ var Symbol = require('./Symbol');
  */
 module.exports = Symbol('__internal');
 
-},{"./Symbol":24}],27:[function(require,module,exports){
+},{"./Symbol":24}],28:[function(require,module,exports){
 'use strict';
 
 var supportedDataTypes = getSupportedDataTypes();
@@ -2172,7 +2196,7 @@ function getSupportedDataTypes () {
   return types;
 }
 
-},{}],28:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 'use strict';
 
 module.exports = lowercase;
@@ -2192,7 +2216,7 @@ function lowercase (str) {
   }
 }
 
-},{}],29:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 'use strict';
 
 module.exports = omit;
@@ -2221,7 +2245,7 @@ function omit (obj, props) {
   return newObj;
 }
 
-},{}],30:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 'use strict';
 
 module.exports = safeCall;
@@ -2264,7 +2288,7 @@ function safeCall (fn, args, callback) {
   }
 }
 
-},{"ono":36}],31:[function(require,module,exports){
+},{"ono":37}],32:[function(require,module,exports){
 'use strict';
 
 var contentType = require('content-type');
@@ -2290,7 +2314,7 @@ function setHttpMetadata (file, res) {
   }
 }
 
-},{"../util/lowercase":28,"content-type":34}],32:[function(require,module,exports){
+},{"../util/lowercase":29,"content-type":35}],33:[function(require,module,exports){
 'use strict';
 
 module.exports = stripHash;
@@ -2320,7 +2344,7 @@ function stripHash (url) {
   return url;
 }
 
-},{}],33:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 'use strict';
 
 module.exports = typeOf;
@@ -2360,7 +2384,7 @@ function typeOf (value) {
   return type;
 }
 
-},{}],34:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 /*!
  * content-type
  * Copyright(c) 2015 Douglas Christopher Wilson
@@ -2578,7 +2602,7 @@ function ContentType(type) {
   this.type = type
 }
 
-},{}],35:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 function format(fmt) {
   var re = /(%?)(%([jds]))/g
     , args = Array.prototype.slice.call(arguments, 1);
@@ -2617,7 +2641,7 @@ function format(fmt) {
 
 module.exports = format;
 
-},{}],36:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 'use strict';
 
 var format = require('format-util');
@@ -2920,6 +2944,6 @@ function lazyPopStack (error) {
   });
 }
 
-},{"format-util":35}]},{},[16])(16)
+},{"format-util":36}]},{},[16])(16)
 });
 //# sourceMappingURL=json-schema-lib.js.map

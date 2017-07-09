@@ -19,7 +19,7 @@
     });
 
     it('should export the "create" function for creating multiple instances', function (done) {
-      expect(jsonSchemaLib.readSync).to.be.a('function');
+      expect(jsonSchemaLib.create).to.be.a('function');
       done();
     });
 
@@ -28,8 +28,8 @@
       done();
     });
 
-    it('should export the "plugins" object for the default instance', function (done) {
-      expect(jsonSchemaLib.plugins).to.be.an('object');
+    it('should export the "plugins" array for the default instance', function (done) {
+      expect(jsonSchemaLib.plugins).to.be.an('array');
       done();
     });
 
