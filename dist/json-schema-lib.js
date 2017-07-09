@@ -1,5 +1,5 @@
 /*!
- * Json Schema Lib v0.0.5 (July 8th 2017)
+ * Json Schema Lib v0.0.5 (July 9th 2017)
  * 
  * https://github.com/BigstickCarpet/json-schema-lib
  * 
@@ -174,7 +174,7 @@ File.prototype.toString = function toString () {
 };
 
 /**
- * Allows the {@link File} to be safely serialized as JSON by removing circular references.
+ * Serializes the {@link File} instance
  *
  * @returns {object}
  */
@@ -323,6 +323,18 @@ function JsonSchemaLib (config, plugins) {
  */
 JsonSchemaLib.prototype.use = function use (plugin, priority) {
   this.plugins.use(plugin, priority);
+};
+
+/**
+ * Serializes the {@link JsonSchemaLib} instance
+ *
+ * @returns {object}
+ */
+JsonSchemaLib.prototype.toJSON = function toJSON () {
+  return {
+    config: this.config,
+    plugins: this.plugins,
+  };
 };
 
 /**
@@ -925,6 +937,8 @@ PluginHelper.prototype.parseFile = function parseFile (args) {
 
 /**
  * Serializes the {@link PluginHelper}
+ *
+ * @returns {object}
  */
 PluginHelper.prototype.toJSON = function toJSON () {
   return this[__internal].plugins;
@@ -1230,7 +1244,7 @@ PluginManager.prototype.use = function use (plugin, priority) {
 /**
  * Serializes the {@link PluginManager}
  *
- * @private
+ * @returns {object}
  */
 PluginManager.prototype.toJSON = function toJSON () {
   return this[__internal].plugins;
