@@ -953,7 +953,7 @@ PluginHelper.prototype.toJSON = function toJSON () {
  * @returns {number}
  */
 function sortByPriority (pluginA, pluginB) {
-  return pluginB.priority - pluginA.priority;
+  return (pluginB.priority || 0) - (pluginA.priority || 0);
 }
 
 },{"../../util/internal":26,"./callAsyncPlugin":9,"./callSyncPlugin":10,"./validatePlugins":13,"ono":36}],9:[function(require,module,exports){
@@ -1305,15 +1305,6 @@ function Schema (config, plugins) {
    * @readonly
    */
   this.files = new FileArray(this);
-
-  /**
-   * Indicates whether the schema contains any circular references.
-   * Schemas with circular references may cause errors if you attempt to convert them to JSON.
-   *
-   * @type {boolean}
-   * @readonly
-   */
-  this.circular = false;
 }
 
 Object.defineProperties(Schema.prototype, {
@@ -2220,7 +2211,7 @@ function omit (obj, props) {
   var newObj = {};
 
   for (var i = 0; i < keys.length; i++) {
-    var key = Object.keys[i];
+    var key = keys[i];
 
     if (props.indexOf(key) === -1) {
       newObj[key] = obj[key];
