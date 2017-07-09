@@ -28,6 +28,7 @@
         readFileSync: pluginMethod,
         decodeFile: pluginMethod,
         parseFile: pluginMethod,
+        finished: pluginMethod,
       });
 
       // Read the schema, using the dummy plugin
@@ -40,7 +41,7 @@
         args.next();
       }
 
-      expect(callCounter).to.equal(11);
+      expect(callCounter).to.equal(12);
       done();
     });
 
