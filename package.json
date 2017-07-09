@@ -75,6 +75,6 @@
     "content-type": "^1.0.2",
     "follow-redirects": "^1.2.3",
     "mime-types": "^2.1.15",
-    "ono": "^4.0.1"
+    "ono": "^4.0.2"
   }
 }
