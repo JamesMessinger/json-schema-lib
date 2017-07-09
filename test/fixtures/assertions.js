@@ -12,7 +12,6 @@
   assert.validSchema = function validSchema (schema) {
     expect(schema).to.be.an('object').and.ok;
     expect(schema).to.have.property('files').that.is.an('array');
-    expect(schema).to.have.property('circular').that.is.a('boolean');
     expect(schema).to.have.property('root');
     expect(schema).to.have.property('rootURL');
     expect(schema).to.have.property('rootFile');
