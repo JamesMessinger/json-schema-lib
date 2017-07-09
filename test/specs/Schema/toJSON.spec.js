@@ -1,33 +1,6 @@
 (function () {
   'use strict';
 
-  var defaultConfig = {
-    http: {
-      headers: {},
-      maxRedirects: 5,
-      timeout: 5000,
-      withCredentials: false,
-    },
-    sync: true,
-  };
-
-  var defaultPlugins = host.node
-    ? [
-      { name: 'NodeUrlPlugin', priority: 20 },
-      { name: 'JsonPlugin', priority: 20 },
-      { name: 'FileSystemPlugin', priority: 10 },
-      { name: 'BufferDecoderPlugin', priority: 10 },
-      { name: 'HttpPlugin', priority: 5 },
-      { name: 'ArrayDecoderPlugin', priority: 5 },
-    ]
-    : [
-      { name: 'BrowserUrlPlugin', priority: 20 },
-      { name: 'JsonPlugin', priority: 20 },
-      { name: 'TextDecoderPlugin', priority: 10 },
-      { name: 'XMLHttpRequestPlugin', priority: 5 },
-      { name: 'ArrayDecoderPlugin', priority: 5 },
-    ];
-
   describe('Schema.toJSON()', function () {
 
     it('should serialize a schema with default config and plugins', function (done) {
@@ -35,8 +8,8 @@
       var json = JSON.parse(JSON.stringify(schema));
 
       expect(json).to.deep.equal({
-        config: defaultConfig,
-        plugins: defaultPlugins,
+        config: helpers.getDefaultConfig(),
+        plugins: helpers.getDefaultPlugins(),
         files: [{
           url: schema.files[0].url,
           mimeType: schema.files[0].mimeType,
@@ -60,8 +33,8 @@
       var json = JSON.parse(JSON.stringify(schema));
 
       expect(json).to.deep.equal({
-        config: defaultConfig,
-        plugins: [plugin2].concat(defaultPlugins).concat(plugin1),
+        config: helpers.getDefaultConfig(),
+        plugins: [plugin2].concat(helpers.getDefaultPlugins()).concat(plugin1),
         files: [{
           url: schema.files[0].url,
           mimeType: schema.files[0].mimeType,
@@ -78,8 +51,8 @@
       var json = JSON.parse(JSON.stringify(schema));
 
       expect(json).to.deep.equal({
-        config: defaultConfig,
-        plugins: defaultPlugins,
+        config: helpers.getDefaultConfig(),
+        plugins: helpers.getDefaultPlugins(),
         files: schema.files.map(function (file) {
           return {
             url: file.url,

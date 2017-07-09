@@ -16,4 +16,5 @@ globals:
 
   # Test Fixtures
   assert: false
+  helpers: false
   path: false
