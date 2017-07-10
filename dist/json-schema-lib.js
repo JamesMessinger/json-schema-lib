@@ -11,7 +11,7 @@
 
 var ono = require('ono');
 var typeOf = require('../util/typeOf');
-var deepAssign = require('../util/deepClone').assign;
+var deepAssign = require('../util/deepAssign');
 
 module.exports = Config;
 
@@ -99,7 +99,7 @@ function validateConfig (config) {
   }
 }
 
-},{"../util/Promise":23,"../util/deepClone":26,"../util/typeOf":34,"ono":37}],2:[function(require,module,exports){
+},{"../util/Promise":23,"../util/deepAssign":26,"../util/typeOf":34,"ono":37}],2:[function(require,module,exports){
 'use strict';
 
 var omit = require('../util/omit');
@@ -313,7 +313,7 @@ module.exports = JsonSchemaLib;
  * @class
  */
 function JsonSchemaLib (config, plugins) {
-  if (Array.isArray(config)) {
+  if (plugins === undefined && Array.isArray(config)) {
     plugins = config;
     config = undefined;
   }
@@ -688,7 +688,7 @@ function readReferencedFiles (schema, callback) {
 
   // Have we finished reading everything?
   if (filesToRead.length === 0 && filesBeingRead.length === 0) {
-    return callback(null, schema);
+    return safeCall(finished, schema, callback);
   }
 
   // In sync mode, just read the next file.
@@ -699,7 +699,18 @@ function readReferencedFiles (schema, callback) {
     file = filesToRead[i];
     safeCall(readFile, file, callback);
   }
+}
 
+/**
+ * Performs final cleanup steps on the schema after all files have been read successfully.
+ *
+ * @param {Schema} schema
+ * @param {function} callback
+ */
+function finished (schema, callback) {
+  schema.plugins.finished();
+  delete schema.config.sync;
+  callback(null, schema);
 }
 
 },{"../../util/internal":27,"../../util/safeCall":31,"../../util/stripHash":33,"../File":2,"../Schema":15,"./resolveFileReferences":7}],7:[function(require,module,exports){
@@ -918,7 +929,6 @@ PluginHelper.prototype.readFileAsync = function readFileAsync (args, callback) {
  * Decodes the given file's data, in place.
  *
  * @param {File} args.file - The {@link File} to decode.
- * @returns {string|ArrayBuffer|Buffer}
  */
 PluginHelper.prototype.decodeFile = function decodeFile (args) {
   try {
@@ -940,7 +950,6 @@ PluginHelper.prototype.decodeFile = function decodeFile (args) {
  * Parses the given file's data, in place.
  *
  * @param {File} args.file - The {@link File} to parse.
- * @returns {*} - The parsed data, which can be any value (string, number, object, array, null, undefined, etc.)
  */
 PluginHelper.prototype.parseFile = function parseFile (args) {
   try {
@@ -955,6 +964,20 @@ PluginHelper.prototype.parseFile = function parseFile (args) {
   }
   catch (err) {
     throw ono(err, 'Unable to parse %s', args.file.url);
+  }
+};
+
+/**
+ * Performs final cleanup steps on the schema after all files have been read successfully.
+ */
+PluginHelper.prototype.finished = function finished () {
+  try {
+    // NOTE: It's ok if no plugin handles this method.
+    // It's just an opportunity for plugins to perform cleanup tasks if necessary.
+    callSyncPlugin(this, 'finished', {});
+  }
+  catch (err) {
+    throw ono(err, 'Error finalizing schema');
   }
 };
 
@@ -1200,7 +1223,7 @@ function validatePlugins (plugins) {
 var ono = require('ono');
 var typeOf = require('../util/typeOf');
 var assign = require('../util/assign');
-var deepClone = require('../util/deepClone');
+var deepAssign = require('../util/deepAssign');
 var validatePlugin = require('./PluginHelper/validatePlugin');
 var validatePlugins = require('./PluginHelper/validatePlugins');
 
@@ -1218,8 +1241,8 @@ function PluginManager (plugins) {
   validatePlugins(plugins);
   plugins = plugins || PluginManager.defaults;
 
-  // Deep-clone the plugins, in case the same plugin is used for different JsonSchemaLib instances
-  var pluginManager = plugins.map(deepClone);
+  // Clone the plugins, so that multiple JsonSchemaLib instances can safely use the same plugins
+  var pluginManager = plugins.map(clonePlugin);
 
   // Return an array that "inherits" from PluginManager
   return assign(pluginManager, PluginManager.prototype);
@@ -1246,7 +1269,7 @@ PluginManager.prototype.use = function use (plugin, priority) {
   validatePriority(priority);
 
   // Clone the plugin, so that multiple JsonSchemaLib instances can safely use the same plugin
-  plugin = deepClone(plugin);
+  plugin = clonePlugin(plugin);
   plugin.priority = priority || plugin.priority;
 
   this.push(plugin);
@@ -1266,7 +1289,18 @@ function validatePriority (priority) {
   }
 }
 
-},{"../util/assign":25,"../util/deepClone":26,"../util/typeOf":34,"./PluginHelper/validatePlugin":12,"./PluginHelper/validatePlugins":13,"ono":37}],15:[function(require,module,exports){
+/**
+ * Returns a deep clone of the given plugin.
+ *
+ * @param {object} plugin
+ * @returns {object}
+ */
+function clonePlugin (plugin) {
+  var clone = {};
+  return deepAssign(clone, plugin);
+}
+
+},{"../util/assign":25,"../util/deepAssign":26,"../util/typeOf":34,"./PluginHelper/validatePlugin":12,"./PluginHelper/validatePlugins":13,"ono":37}],15:[function(require,module,exports){
 'use strict';
 
 var Config = require('./Config');
@@ -2070,33 +2104,7 @@ function assign (target, source) {
 
 var typeOf = require('./typeOf');
 
-module.exports = deepClone;
-module.exports.assign = deepAssign;
-
-/**
- * Returns a deep clone of the given value
- *
- * @param {*} value
- * @returns {*}
- */
-function deepClone (value) {
-  var type = typeOf(value);
-
-  if (type.isPOJO) {
-    return deepAssign({}, value);
-  }
-  else if (type.isArray) {
-    var clone = [];
-    for (var i = 0; i < value.length; i++) {
-      clone.push(deepClone(value[i]));
-    }
-  }
-  else if (type.hasValue) {
-    // string, boolean, number, function, Date, RegExp, etc.
-    // Just return it as-is
-    return value;
-  }
-}
+module.exports = deepAssign;
 
 /**
  * Deeply assigns the properties of the source object to the target object
@@ -2109,10 +2117,48 @@ function deepAssign (target, source) {
 
   for (var i = 0; i < keys.length; i++) {
     var key = keys[i];
-    target[key] = deepClone(source[key]);
+    var oldValue = target[key];
+    var newValue = source[key];
+
+    target[key] = deepClone(newValue, oldValue);
   }
 
   return target;
+}
+
+/**
+ * Returns a deep clone of the given value
+ *
+ * @param {*} value
+ * @param {*} oldValue
+ * @returns {*}
+ */
+function deepClone (value, oldValue) {
+  var type = typeOf(value);
+  var clone;
+
+  if (type.isPOJO) {
+    var oldType = typeOf(oldValue);
+    if (oldType.isPOJO) {
+      // Return a merged clone of the old POJO and the new POJO
+      clone = deepAssign({}, oldValue);
+      return deepAssign(clone, value);
+    }
+    else {
+      return deepAssign({}, value);
+    }
+  }
+  else if (type.isArray) {
+    clone = [];
+    for (var i = 0; i < value.length; i++) {
+      clone.push(deepClone(value[i]));
+    }
+  }
+  else if (type.hasValue) {
+    // string, boolean, number, function, Date, RegExp, etc.
+    // Just return it as-is
+    return value;
+  }
 }
 
 },{"./typeOf":34}],27:[function(require,module,exports){
@@ -2682,7 +2728,7 @@ function create (Klass) {
 
     // Determine which arguments were actually specified
     if (typeof err === 'string') {
-      formatArgs = arguments;
+      formatArgs = slice.call(arguments);
       err = props = undefined;
     }
     else if (typeof props === 'string') {
