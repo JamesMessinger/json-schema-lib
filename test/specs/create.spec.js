@@ -3,7 +3,7 @@
 
   describe('create()', function () {
 
-    it.skip('should use the default config and plugins when called with no params', function (done) {
+    it('should use the default config and plugins when called with no params', function (done) {
       var instance = jsonSchemaLib.create();
 
       expect(instance).not.to.equal(jsonSchemaLib);
@@ -15,7 +15,7 @@
       done();
     });
 
-    it.skip('should use the default config and plugins when called with null/undefined', function (done) {
+    it('should use the default config and plugins when called with null/undefined', function (done) {
       var args = [
         [undefined],
         [null],
@@ -38,7 +38,7 @@
       done();
     });
 
-    it.skip('should use a custom config', function (done) {
+    it('should use a custom config', function (done) {
       var config = {
         customSetting: 'foo',
         http: {
@@ -61,7 +61,7 @@
       done();
     });
 
-    it.skip('should use custom plugins', function (done) {
+    it('should use custom plugins', function (done) {
       var plugin1 = { name: 'Plugin1', foo: 'bar' };
       var plugin2 = { name: 'Plugin2', fizz: 'buzz' };
 
@@ -75,7 +75,7 @@
       done();
     });
 
-    it.skip('should use custom config and plugins', function (done) {
+    it('should use custom config and plugins', function (done) {
       var plugin1 = { name: 'Plugin1', foo: 'bar' };
       var plugin2 = { name: 'Plugin2', fizz: 'buzz' };
       var config = {
@@ -100,7 +100,7 @@
       done();
     });
 
-    it('can be called as a standalone function', function (done) {
+    it.skip('can be called as a standalone function', function (done) {
       var create = jsonSchemaLib.create;
       var instance = create({ myConfig: 'foo' });
 
@@ -117,7 +117,7 @@
       done();
     });
 
-    it('should throw an error if called with invalid config', function (done) {
+    it.skip('should throw an error if called with invalid config', function (done) {
       var expectedError = 'Invalid arguments. Expected a configuration object.';
 
       expect(callCreate(0)).to.throw(expectedError);
@@ -135,7 +135,7 @@
       done();
     });
 
-    it('should throw an error if called with invalid plugins', function (done) {
+    it.skip('should throw an error if called with invalid plugins', function (done) {
       var expectedError = 'Invalid arguments. Expected an array of plugins.';
 
       expect(callCreate(null, 0)).to.throw(expectedError);

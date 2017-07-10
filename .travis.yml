@@ -7,16 +7,16 @@ sudo: false
 language: node_js
 matrix:
   include:
+    # Browsers
+    - node_js: 8
+      env: KARMA=true
+
     # Node
     - node_js: 4
     - node_js: 5
     - node_js: 6
     - node_js: 7
     - node_js: 8
-
-    # Browsers
-    - node_js: 8
-      env: KARMA=true
 
   # Don't include web browser tests in the TravisCI status badge
   # (SauceLabs has its own per-browser status badge)
