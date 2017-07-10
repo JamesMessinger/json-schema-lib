@@ -15,7 +15,7 @@ matrix:
     - node_js: 8
 
     # Browsers
-    - node_js: 4
+    - node_js: 8
       env: KARMA=true
 
   # Don't include web browser tests in the TravisCI status badge
