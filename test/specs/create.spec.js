@@ -1,9 +1,9 @@
 (function () {
   'use strict';
 
-  describe.skip('create()', function () {
+  describe('create()', function () {
 
-    it('should use the default config and plugins when called with no params', function (done) {
+    it.skip('should use the default config and plugins when called with no params', function (done) {
       var instance = jsonSchemaLib.create();
 
       expect(instance).not.to.equal(jsonSchemaLib);
@@ -15,7 +15,7 @@
       done();
     });
 
-    it('should use the default config and plugins when called with null/undefined', function (done) {
+    it.skip('should use the default config and plugins when called with null/undefined', function (done) {
       var args = [
         [undefined],
         [null],
@@ -38,7 +38,7 @@
       done();
     });
 
-    it('should use a custom config', function (done) {
+    it.skip('should use a custom config', function (done) {
       var config = {
         customSetting: 'foo',
         http: {
@@ -61,7 +61,7 @@
       done();
     });
 
-    it('should use custom plugins', function (done) {
+    it.skip('should use custom plugins', function (done) {
       var plugin1 = { name: 'Plugin1', foo: 'bar' };
       var plugin2 = { name: 'Plugin2', fizz: 'buzz' };
 
@@ -75,7 +75,7 @@
       done();
     });
 
-    it('should use custom config and plugins', function (done) {
+    it.skip('should use custom config and plugins', function (done) {
       var plugin1 = { name: 'Plugin1', foo: 'bar' };
       var plugin2 = { name: 'Plugin2', fizz: 'buzz' };
       var config = {
