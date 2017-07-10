@@ -3,26 +3,34 @@
 # https://docs.travis-ci.com/user/customizing-the-build/
 # https://docs.travis-ci.com/user/migrating-from-legacy/
 
+dist: trusty
 sudo: false
 language: node_js
+
+addons:
+  firefox: latest
+  chrome: stable
+
 matrix:
   include:
+    # Node
+    # - node_js: 4
+    # - node_js: 5
+    # - node_js: 6
+    # - node_js: 7
+    # - node_js: 8
+
     # Browsers
     - node_js: 8
       env: KARMA=true
 
-    # Node
-    - node_js: 4
-    - node_js: 5
-    - node_js: 6
-    - node_js: 7
     - node_js: 8
+      env: KARMA=true SAUCE=true
 
-  # Don't include web browser tests in the TravisCI status badge
-  # (SauceLabs has its own per-browser status badge)
+  # Don't include SauceLabs tests in the TravisCI status badge, since SauceLabs has its own badge
   fast_finish: true
   allow_failures:
-    - env: KARMA=true
+    - env: SAUCE=true
 
 before_script:
   # Setup a virtual display for browser testing
@@ -30,8 +38,15 @@ before_script:
   - sh -e /etc/init.d/xvfb start
 
 script:
+  # Always make sure the code passes linting rules
   - npm run lint
-  - npm run cover
+
+  # Build browser distributables before running Karma tests
+  - [[ $KARMA ]] && npm run build
+
+  # SauceLabs hangs when code coverage is enabled (not sure why), so just run Karma normally.
+  # For all other environments, run tests + code coverage.
+  - [[ $SAUCE ]] && npm run karma || npm run cover
 
 after_success:
   # concatenate all code-coverage data into a single file

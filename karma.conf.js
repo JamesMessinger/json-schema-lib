@@ -64,7 +64,7 @@ function configureCodeCoverage (config) {
 
   config.files = config.files.map(function (file) {
     if (typeof file === 'string') {
-      file = file.replace(/^dist\/(.*)\.min\.js$/, 'dist/$1.test.js');
+      file = file.replace(/^dist\/(.*?)(\.min)?\.js$/, 'dist/$1.test.js');
     }
     return file;
   });
@@ -82,7 +82,7 @@ function configureLocalBrowsers (config) {
     config.browsers = ['Firefox', 'Chrome', 'Safari'];
   }
   else if (isLinux) {
-    config.browsers = ['Firefox'];
+    config.browsers = ['Firefox', 'ChromeHeadless'];
   }
   else if (isWindows) {
     config.browsers = ['Firefox', 'Chrome', 'IE9', 'IE10', 'IE'];

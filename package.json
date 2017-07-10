@@ -38,9 +38,9 @@
   ],
   "scripts": {
     "lint": "eslint lib test --fix",
-    "build": "simplifyify lib/browser.js --outfile dist/json-schema-lib.js --standalone jsonSchemaLib --bundle --debug --minify",
+    "build": "simplifyify lib/browser.js --outfile dist/json-schema-lib.js --standalone jsonSchemaLib --bundle --debug --minify --test",
     "test": "npm run mocha && npm run karma && npm run lint",
-    "cover": "istanbul cover _mocha --dir coverage/node && npm run build -- --test && npm run karma -- --cover",
+    "cover": "istanbul cover _mocha --dir coverage/node && npm run karma -- --cover",
     "mocha": "mocha",
     "karma": "karma start --single-run",
     "upgrade": "npm-check -u",
