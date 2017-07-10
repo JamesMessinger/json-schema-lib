@@ -100,7 +100,7 @@
       done();
     });
 
-    it.skip('can be called as a standalone function', function (done) {
+    it('can be called as a standalone function', function (done) {
       var create = jsonSchemaLib.create;
       var instance = create({ myConfig: 'foo' });
 
@@ -117,7 +117,7 @@
       done();
     });
 
-    it.skip('should throw an error if called with invalid config', function (done) {
+    it('should throw an error if called with invalid config', function (done) {
       var expectedError = 'Invalid arguments. Expected a configuration object.';
 
       expect(callCreate(0)).to.throw(expectedError);
@@ -135,7 +135,7 @@
       done();
     });
 
-    it.skip('should throw an error if called with invalid plugins', function (done) {
+    it('should throw an error if called with invalid plugins', function (done) {
       var expectedError = 'Invalid arguments. Expected an array of plugins.';
 
       expect(callCreate(null, 0)).to.throw(expectedError);
