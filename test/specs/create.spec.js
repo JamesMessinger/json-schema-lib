@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  describe('create()', function () {
+  describe.skip('create()', function () {
 
     it('should use the default config and plugins when called with no params', function (done) {
       var instance = jsonSchemaLib.create();

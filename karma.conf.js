@@ -7,7 +7,6 @@ module.exports = function (karma) {
   var config = {
     frameworks: ['mocha', 'chai', 'host-environment'],
     reporters: ['verbose'],
-    concurrency: 2,
 
     files: [
       // JsonSchemaLib
