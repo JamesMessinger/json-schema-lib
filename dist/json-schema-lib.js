@@ -1,5 +1,5 @@
 /*!
- * Json Schema Lib v0.0.5 (July 9th 2017)
+ * Json Schema Lib v0.0.5 (July 10th 2017)
  * 
  * https://github.com/BigstickCarpet/json-schema-lib
  * 
