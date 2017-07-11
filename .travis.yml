@@ -11,19 +11,14 @@ addons:
   firefox: latest
   chrome: stable
 
-env:
-  # This is needed for "allow_failures" to work.
-  # https://docs.travis-ci.com/user/customizing-the-build#Matching-Jobs-with-allow_failures
-  - KARMA=false SAUCE=false
-
 matrix:
   include:
     # Node
-    - node_js: 4
-    - node_js: 5
-    - node_js: 6
-    - node_js: 7
-    - node_js: 8
+    # - node_js: 4
+    # - node_js: 5
+    # - node_js: 6
+    # - node_js: 7
+    # - node_js: 8
 
     # Browsers
     - node_js: 8
@@ -35,7 +30,8 @@ matrix:
   # Don't include SauceLabs tests in the TravisCI status badge, since SauceLabs has its own badge
   fast_finish: true
   allow_failures:
-      env: KARMA=true SAUCE=true
+    node_js: 8
+    env: KARMA=true SAUCE=true
 
 before_script:
   # Setup a virtual display for browser testing
