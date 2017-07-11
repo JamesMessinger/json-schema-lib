@@ -11,6 +11,12 @@ addons:
   firefox: latest
   chrome: stable
 
+# These keys are needed for "allow_failures" to work.
+# https://docs.travis-ci.com/user/customizing-the-build#Matching-Jobs-with-allow_failures
+node_js: 8
+env:
+  - KARMA=false SAUCE=false
+
 matrix:
   include:
     # Node
