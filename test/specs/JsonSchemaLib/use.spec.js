@@ -4,13 +4,14 @@
   describe.skip('JsonSchemaLib.use()', function () {
 
     it('can add a new plugin, in addition to the default plugins', function (done) {
-      var plugin = helper.createMockPlugin({
+      var plugin = helpers.createMockPlugin({
         name: 'My Plugin',
         priority: 1000,
       });
 
       var instance = jsonSchemaLib.create();
       instance.use(plugin);
+      done();
     });
 
     it('cannot be called as a standalone function', function (done) {

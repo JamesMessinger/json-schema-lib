@@ -106,10 +106,11 @@ function configureLocalBrowsers (config) {
  * https://github.com/karma-runner/karma-sauce-launcher
  */
 function configureSauceLabs (config) {
+  var SAUCE = process.env.SAUCE === 'true';
   var username = process.env.SAUCE_USERNAME;
   var accessKey = process.env.SAUCE_ACCESS_KEY;
 
-  if (!username || !accessKey) {
+  if (!SAUCE || !username || !accessKey) {
     console.warn('SauceLabs is not enabled');
     return;
   }
@@ -118,6 +119,7 @@ function configureSauceLabs (config) {
   var testName = project.name + ' v' + project.version;
   var build = testName + ' Build #' + process.env.TRAVIS_JOB_NUMBER + ' @ ' + new Date();
 
+  /* eslint camelcase:off */
   var sauceLaunchers = {
     SauceLabs_Chrome_Latest: {
       base: 'SauceLabs',
