@@ -11,9 +11,10 @@ addons:
   firefox: latest
   chrome: stable
 
-# The "env" key is needed for "allow_failures" to work, even if it's empty.
-# https://docs.travis-ci.com/user/customizing-the-build#Matching-Jobs-with-allow_failures
-env: null
+env:
+  # This is needed for "allow_failures" to work.
+  # https://docs.travis-ci.com/user/customizing-the-build#Matching-Jobs-with-allow_failures
+  - KARMA=false SAUCE=false
 
 matrix:
   include:
@@ -46,11 +47,11 @@ script:
   - npm run lint
 
   # Build browser distributables before running Karma tests
-  - '[[ $KARMA ]] && npm run build'
+  - '[[ $KARMA = "true" ]] && npm run build || echo "no build is necessary"'
 
   # SauceLabs hangs when code coverage is enabled (not sure why), so just run Karma normally.
   # For all other environments, run tests + code coverage.
-  - '[[ $SAUCE ]] && npm run karma || npm run cover'
+  - '[[ $SAUCE = "true" ]] && npm run karma || npm run cover'
 
 after_success:
   # concatenate all code-coverage data into a single file
