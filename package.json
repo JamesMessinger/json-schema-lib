@@ -1,6 +1,6 @@
 {
   "name": "json-schema-lib",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Extensible JSON Schema library with support for multi-file schemas using $ref",
   "keywords": [
     "json",
@@ -48,7 +48,7 @@
     "release": "npm run upgrade && npm run build && npm test && npm run bump && npm publish"
   },
   "devDependencies": {
-    "chai": "^4.0.2",
+    "chai": "^4.1.0",
     "codacy-coverage": "^2.0.0",
     "coveralls": "^2.11.9",
     "eslint": "^4.0.0",
@@ -68,7 +68,7 @@
     "karma-sinon": "^1.0.5",
     "karma-verbose-reporter": "0.0.6",
     "mocha": "^3.2.0",
-    "npm-check": "^5.4.0",
+    "npm-check": "^5.4.5",
     "simplifyify": "^3.2.4",
     "sinon": "^2.3.8",
     "version-bump-prompt": "^3.0.1"
