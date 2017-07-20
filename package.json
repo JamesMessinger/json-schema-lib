@@ -65,10 +65,12 @@
     "karma-mocha": "^1.2.0",
     "karma-safari-launcher": "^1.0.0",
     "karma-sauce-launcher": "^1.1.0",
+    "karma-sinon": "^1.0.5",
     "karma-verbose-reporter": "0.0.6",
     "mocha": "^3.2.0",
     "npm-check": "^5.4.0",
     "simplifyify": "^3.2.4",
+    "sinon": "^2.3.8",
     "version-bump-prompt": "^3.0.1"
   },
   "dependencies": {

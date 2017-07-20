@@ -13,6 +13,7 @@
     // Expose Node globals
     global.jsonSchemaLib = require('../../');
     global.expect = require('chai').expect;
+    global.sinon = require('sinon');
   }
 
 }());
