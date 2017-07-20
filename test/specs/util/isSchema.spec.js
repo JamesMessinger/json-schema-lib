@@ -18,30 +18,33 @@
     });
 
     it('should return true for the "schema" argument inside a plugin', function (done) {
-      var callCounter = 0;
-
-      // Create a new instance of JsonSchemaLib with a dummy plugin
-      var instance = jsonSchemaLib.create();
-      instance.use({
+      var myPlugin = {
         priority: 100,
-        resolveURL: pluginMethod,
-        readFileSync: pluginMethod,
-        decodeFile: pluginMethod,
-        parseFile: pluginMethod,
-        finished: pluginMethod,
-      });
+        resolveURL: sinon.spy(checkSchemaArgument),
+        readFileSync: sinon.spy(checkSchemaArgument),
+        decodeFile: sinon.spy(checkSchemaArgument),
+        parseFile: sinon.spy(checkSchemaArgument),
+        finished: sinon.spy(checkSchemaArgument),
+      };
 
       // Read the schema, using the dummy plugin
+      var instance = jsonSchemaLib.create();
+      instance.use(myPlugin);
       instance.readSync(path.rel('schemas/external-refs-single/person.json'));
 
       // Make sure the `schema` argument of each plugin method passes `util.isSchema()`
-      function pluginMethod (args) {
+      function checkSchemaArgument (args) {
         expect(util.isSchema(args.schema)).to.be.true;
-        callCounter++;
         args.next();
       }
 
-      expect(callCounter).to.equal(12);
+      // Make sure each of the plugin methods was called as expected
+      sinon.assert.callCount(myPlugin.resolveURL, 5);
+      sinon.assert.calledTwice(myPlugin.readFileSync);
+      sinon.assert.calledTwice(myPlugin.decodeFile);
+      sinon.assert.calledTwice(myPlugin.parseFile);
+      sinon.assert.calledOnce(myPlugin.finished);
+
       done();
     });
 

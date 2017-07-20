@@ -22,28 +22,29 @@
     });
 
     it('should return true for the "file" argument inside a plugin', function (done) {
-      var callCounter = 0;
-
-      // Create a new instance of JsonSchemaLib with a dummy plugin
-      var instance = jsonSchemaLib.create();
-      instance.use({
+      var myPlugin = {
         priority: 100,
-        readFileSync: pluginMethod,
-        decodeFile: pluginMethod,
-        parseFile: pluginMethod,
-      });
+        readFileSync: sinon.spy(checkFileArgument),
+        decodeFile: sinon.spy(checkFileArgument),
+        parseFile: sinon.spy(checkFileArgument),
+      };
 
       // Read the schema, using the dummy plugin
+      var instance = jsonSchemaLib.create();
+      instance.use(myPlugin);
       instance.readSync(path.rel('schemas/external-refs-single/person.json'));
 
-      // Make sure the `schema` argument of each plugin method passes `util.isFile()`
-      function pluginMethod (args) {
+      // Make sure the `file` argument of each plugin method passes `util.isFile()`
+      function checkFileArgument (args) {
         expect(util.isFile(args.file)).to.be.true;
-        callCounter++;
         args.next();
       }
 
-      expect(callCounter).to.equal(6);
+      // Each plugin method should have been called twice (the schema has 2 files)
+      sinon.assert.calledTwice(myPlugin.readFileSync);
+      sinon.assert.calledTwice(myPlugin.decodeFile);
+      sinon.assert.calledTwice(myPlugin.parseFile);
+
       done();
     });
 
