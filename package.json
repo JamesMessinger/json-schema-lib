@@ -51,7 +51,7 @@
     "chai": "^4.1.0",
     "codacy-coverage": "^2.0.0",
     "coveralls": "^2.11.9",
-    "eslint": "^4.0.0",
+    "eslint": "^4.3.0",
     "eslint-config-modular": "^4.1.0",
     "istanbul": "^0.4.5",
     "karma": "^1.4.0",
@@ -70,13 +70,13 @@
     "mocha": "^3.2.0",
     "npm-check": "^5.4.5",
     "simplifyify": "^3.2.4",
-    "sinon": "^2.3.8",
+    "sinon": "^2.4.1",
     "version-bump-prompt": "^3.0.1"
   },
   "dependencies": {
     "content-type": "^1.0.2",
     "follow-redirects": "^1.2.3",
-    "mime-types": "^2.1.15",
+    "mime-types": "^2.1.16",
     "ono": "^4.0.2"
   }
 }
