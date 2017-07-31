@@ -40,9 +40,10 @@
     "lint": "eslint lib test --fix",
     "build": "simplifyify lib/browser.js --outfile dist/json-schema-lib.js --standalone jsonSchemaLib --bundle --debug --minify --test",
     "test": "npm run mocha && npm run karma && npm run lint",
-    "cover": "istanbul cover _mocha --dir coverage/node && npm run karma -- --cover",
     "mocha": "mocha",
+    "mocha:cover": "istanbul cover _mocha --dir coverage/node",
     "karma": "karma start --single-run",
+    "karma:cover": "karma start --single-run --cover",
     "upgrade": "npm-check -u",
     "bump": "bump --prompt --grep dist/* --tag --push --all",
     "release": "npm run upgrade && npm run build && npm test && npm run bump && npm publish"
