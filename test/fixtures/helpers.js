@@ -1,6 +1,16 @@
 (function () {
   'use strict';
 
+  var nodeUrlPlugin = findPluginByName('NodeUrlPlugin');
+  var browserUrlPlugin = findPluginByName('BrowserUrlPlugin');
+  var jsonPlugin = findPluginByName('JsonPlugin');
+  var fileSystemPlugin = findPluginByName('FileSystemPlugin');
+  var bufferDecoderPlugin = findPluginByName('BufferDecoderPlugin');
+  var textDecoderPlugin = findPluginByName('TextDecoderPlugin');
+  var httpPlugin = findPluginByName('HttpPlugin');
+  var xhrPlugin = findPluginByName('XMLHttpRequestPlugin');
+  var arrayDecoderPlugin = findPluginByName('ArrayDecoderPlugin');
+
   host.global.helpers = {
     pluginMethods: {
       /**
@@ -42,46 +52,34 @@
       if (host.node) {
         if (sorted) {
           return [
-            { name: 'NodeUrlPlugin', priority: 20 },
-            { name: 'JsonPlugin', priority: 20 },
-            { name: 'FileSystemPlugin', priority: 10 },
-            { name: 'BufferDecoderPlugin', priority: 10 },
-            { name: 'HttpPlugin', priority: 5 },
-            { name: 'ArrayDecoderPlugin', priority: 5 },
+            nodeUrlPlugin, jsonPlugin, fileSystemPlugin, bufferDecoderPlugin, httpPlugin, arrayDecoderPlugin
           ];
         }
         else {
           return [
-            { name: 'NodeUrlPlugin', priority: 20 },
-            { name: 'FileSystemPlugin', priority: 10 },
-            { name: 'HttpPlugin', priority: 5 },
-            { name: 'BufferDecoderPlugin', priority: 10 },
-            { name: 'ArrayDecoderPlugin', priority: 5 },
-            { name: 'JsonPlugin', priority: 20 },
+            nodeUrlPlugin, fileSystemPlugin, httpPlugin, bufferDecoderPlugin, arrayDecoderPlugin, jsonPlugin
           ];
         }
       }
       else {
         if (sorted) {
           return [
-            { name: 'BrowserUrlPlugin', priority: 20 },
-            { name: 'JsonPlugin', priority: 20 },
-            { name: 'TextDecoderPlugin', priority: 10 },
-            { name: 'XMLHttpRequestPlugin', priority: 5 },
-            { name: 'ArrayDecoderPlugin', priority: 5 },
+            browserUrlPlugin, jsonPlugin, textDecoderPlugin, xhrPlugin, arrayDecoderPlugin
           ];
         }
         else {
           return [
-            { name: 'BrowserUrlPlugin', priority: 20 },
-            { name: 'XMLHttpRequestPlugin', priority: 5 },
-            { name: 'TextDecoderPlugin', priority: 10 },
-            { name: 'ArrayDecoderPlugin', priority: 5 },
-            { name: 'JsonPlugin', priority: 20 },
+            browserUrlPlugin, xhrPlugin, textDecoderPlugin, arrayDecoderPlugin, jsonPlugin
           ];
         }
       }
     },
   };
+
+  function findPluginByName (name) {
+    return jsonSchemaLib.plugins.find(function (plugin) {
+      return plugin.name === name;
+    });
+  }
 
 }());
