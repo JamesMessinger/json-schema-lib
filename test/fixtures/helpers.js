@@ -77,9 +77,12 @@
   };
 
   function findPluginByName (name) {
-    return jsonSchemaLib.plugins.find(function (plugin) {
-      return plugin.name === name;
-    });
+    for (var i = 0; i < jsonSchemaLib.plugins.length; i++) {
+      var plugin = jsonSchemaLib.plugins[i];
+      if (plugin.name === name) {
+        return plugin;
+      }
+    }
   }
 
 }());
