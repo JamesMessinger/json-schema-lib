@@ -1,6 +1,10 @@
 (function () {
   'use strict';
 
+  var httpUrlPattern = /^https?\:\/\//;
+  var fileUrlPattern = /^file\:\/\//;
+  var filesystemPattern = process.platform === 'win32' ? /^[A-Z]\:\\/ : /^\//;
+
   var assert = host.global.assert = host.global.assert || {};
 
   /**
@@ -11,6 +15,8 @@
    */
   assert.validSchema = function validSchema (schema) {
     expect(schema).to.be.an('object').and.ok;
+    expect(schema).to.have.property('config').that.is.an('object');
+    expect(schema).to.have.property('plugins').that.is.an('array');
     expect(schema).to.have.property('files').that.is.an('array');
     expect(schema).to.have.property('root');
     expect(schema).to.have.property('rootURL');
@@ -24,7 +30,7 @@
     else {
       expect(schema.root).to.be.an('object').and.not.null;
       expect(schema.root).to.equal(schema.files[0].data);
-      expect(schema.rootURL).to.be.a('string').and.not.null;
+      expect(schema.rootURL).to.be.a('string');
       expect(schema.rootURL).to.equal(schema.files[0].url);
       expect(schema.rootFile).to.be.an('object').and.not.null;
       expect(schema.rootFile).to.equal(schema.files[0]);
@@ -65,28 +71,31 @@
    */
   assert.validFile = function validFile (file) {
     expect(file).to.be.an('object').and.ok;
-    expect(file).to.have.property('url').that.is.a('string').with.length.above(0);
-    expect(file).to.have.property('urlType').that.is.a('string').with.length.above(0);
-    expect(file).to.have.property('path').that.is.a('string').with.length.above(0);
-    expect(file).to.have.property('extension').that.is.a('string').with.length.above(0);
+    assert.validSchema(file.schema);
+    expect(file).to.have.property('url').that.is.a('string');
     expect(file).to.have.property('data');
-    expect(file).to.have.property('dataType').that.is.a('string').with.length.above(0);
-    expect(file).to.have.property('parsed').that.is.a('boolean');
-    expect(file).to.have.property('dereferenced').that.is.a('boolean');
+    expect(file).to.have.property('mimeType');
+    expect(file).to.have.property('encoding');
 
-    expect(file.extension).to.match(/^\.[a-z]+/);  // lowercase and start with a dot
-
-    if (host.browser) {
-      expect(file.urlType).not.to.equal('file');
+    if (file.mimeType !== undefined) {
+      expect(file.mimeType).to.be.a('string').and.match(/^[a-z]+\/[a-z]+(\+[a-z]+)?$/);
     }
 
-    if (file.urlType === 'http') {
-      expect(file.url).to.match(/^https?\:\/\//);
-      expect(file.path).to.match(/^https?\:\/\//);
+    if (file.encoding !== undefined) {
+      expect(file.encoding).to.be.a('string').and.match(/^[a-z]+(-[0-9]+)+$/);
     }
-    else if (file.urlType === 'file') {
-      expect(file.url).to.match(/^[^ \#\?]+$/);       // enocded path (no spaces, hashes, question marks, etc.)
-      expect(file.path).to.match(/^(\/|[A-Z]\:\\)/);  // POSIX or Windows path
+
+    if (file.url !== '') {
+      if (host.browser) {
+        expect(file.url).to.match(httpUrlPattern);
+      }
+      else {
+        expect(file.url).to.satisfy(function (url) {
+          return httpUrlPattern.test(url) ||
+            fileUrlPattern.test(url) ||
+            filesystemPattern.test(url);
+        });
+      }
     }
   };
 
