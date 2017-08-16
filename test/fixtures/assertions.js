@@ -3,7 +3,7 @@
 
   var httpUrlPattern = /^https?\:\/\//;
   var fileUrlPattern = /^file\:\/\//;
-  var filesystemPattern = process.platform === 'win32' ? /^[A-Z]\:\\/ : /^\//;
+  var filesystemPattern = host.os.windows ? /^[A-Z]\:\\/ : /^\//;
 
   var assert = host.global.assert = host.global.assert || {};
 

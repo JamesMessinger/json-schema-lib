@@ -1,5 +1,5 @@
 /*!
- * Json Schema Lib v0.0.6 (July 20th 2017)
+ * Json Schema Lib v0.0.6 (August 16th 2017)
  * 
  * https://github.com/BigstickCarpet/json-schema-lib
  * 
@@ -1600,7 +1600,7 @@ function stripBOM (str) {
 
 var stripHash = require('../util/stripHash');
 
-// Matches any RFC 3986 URL scheme (e.g. "http://", "ftp://", "file://")
+// Matches any RFC 3986 URL with a scheme (e.g. "http://", "ftp://", "file://")
 var protocolPattern = /^[a-z][a-z\d\+\-\.]*:\/\//i;
 
 /**
@@ -1781,12 +1781,19 @@ module.exports = {
     var file = args.file;
     var next = args.next;
 
-    if (isJsonFile(file)) {
+    try {
+      // Optimistically try to parse the file as JSON.
       return JSON.parse(file.data);
     }
-    else {
-      // The file data is not JSON, so call the next parser plugin
-      next();
+    catch (error) {
+      if (isJsonFile(file)) {
+        // This is a JSON file, but its contents are invalid
+        throw error;
+      }
+      else {
+        // This probably isn't a JSON file, so call the next parser plugin
+        next();
+      }
     }
   },
 };

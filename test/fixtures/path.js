@@ -50,13 +50,13 @@
 
       // Convert the absolute filesystem path to a a URL
       // (e.g. "file://path/to/json-schema-ref-parser/tests/files...")
-      var fileURL = require('url').format({
+      var url = require('url').format({
         protocol: 'file:',
         slashes: true,
         pathname: absPath
       });
 
-      return fileURL;
+      return url;
     },
 
     /**
@@ -87,8 +87,8 @@
       var absPath = require('path').resolve(__dirname, '..');
 
       if (/^[A-Z]\:[\\\/]/.test(absPath)) {
-        // Lowercase the drive letter on Windows, for string comparison purposes
-        absPath = absPath[0].toLowerCase() + absPath.substr(1);
+        // Uppercase the drive letter on Windows, for string comparison purposes
+        absPath = absPath[0].toUpperCase() + absPath.substr(1);
       }
 
       return absPath;

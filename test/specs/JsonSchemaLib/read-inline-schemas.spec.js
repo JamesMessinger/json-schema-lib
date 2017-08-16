@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  describe.only('inline schemas', function () {
+  describe('inline schemas', function () {
     scenarios.forEach(function (scenario) {
       describe('JsonSchemaLib.' + scenario.name, function () {
 
