@@ -12,19 +12,6 @@
   var arrayDecoderPlugin = findPluginByName('ArrayDecoderPlugin');
 
   host.global.helpers = {
-    pluginMethods: {
-      /**
-       * Returns a Plugin method that simply calls the next plugin.
-       *
-       * @returns {function}
-       */
-      passThrough: function passThrough () {
-        return sinon.spy(function (args) {
-          args.next();
-        });
-      },
-    },
-
     /**
      * Returns a POJO with the default JsonSchemaLib configuration
      *

@@ -9,28 +9,28 @@
       myPlugin1 = {
         name: 'My Plugin 1',
         priority: 1001,
-        resolveURL: helpers.pluginMethods.passThrough(),
-        readFileSync: helpers.pluginMethods.passThrough(),
-        decodeFile: helpers.pluginMethods.passThrough(),
-        parseFile: helpers.pluginMethods.passThrough(),
+        resolveURL: sinon.spy(function (args) { args.next(); }),
+        readFileSync: sinon.spy(function (args) { args.next(); }),
+        decodeFile: sinon.spy(function (args) { args.next(); }),
+        parseFile: sinon.spy(function (args) { args.next(); }),
       };
 
       myPlugin2 = {
         name: 'My Plugin 2',
         priority: 1002,
-        resolveURL: helpers.pluginMethods.passThrough(),
-        readFileSync: helpers.pluginMethods.passThrough(),
-        decodeFile: helpers.pluginMethods.passThrough(),
-        parseFile: helpers.pluginMethods.passThrough(),
+        resolveURL: sinon.spy(function (args) { args.next(); }),
+        readFileSync: sinon.spy(function (args) { args.next(); }),
+        decodeFile: sinon.spy(function (args) { args.next(); }),
+        parseFile: sinon.spy(function (args) { args.next(); }),
       };
 
       myPlugin3 = {
         name: 'My Plugin 3',
         priority: 1003,
-        resolveURL: helpers.pluginMethods.passThrough(),
-        readFileSync: helpers.pluginMethods.passThrough(),
-        decodeFile: helpers.pluginMethods.passThrough(),
-        parseFile: helpers.pluginMethods.passThrough(),
+        resolveURL: sinon.spy(function (args) { args.next(); }),
+        readFileSync: sinon.spy(function (args) { args.next(); }),
+        decodeFile: sinon.spy(function (args) { args.next(); }),
+        parseFile: sinon.spy(function (args) { args.next(); }),
       };
     });
 
