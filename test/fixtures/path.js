@@ -3,20 +3,7 @@
 
   var testDirPath = getAbsolutePathOfTestDir();
 
-  host.global.path = {
-    /**
-     * Returns the absolute path of the current working directory.
-     * In Node, this is the "test" directory. In the browser, it is the directory of the current page.
-     */
-    cwd: function cwd () {
-      if (host.node) {
-        return process.cwd() + '/';
-      }
-      else {
-        return location.href;
-      }
-    },
-
+  var path = host.global.path = {
     /**
      * Returns the relative path of a file in the "tests" directory
      */
@@ -40,7 +27,7 @@
     },
 
     /**
-     * Returns the absolute path of a file in the "tests" directory
+     * Returns the absolute path of a file in the "test" directory
      */
     abs: function abs (file) {
       if (host.node) {
@@ -52,31 +39,45 @@
     },
 
     /**
-     * Returns the path of a file in the "test" directory as a URL.
+     * Returns the path of a file in the "test" directory as a file:// URL.
      */
-    url: function url (file) {
+    fileURL: function fileURL (file) {
       var absPath = path.abs(file);
 
-      if (host.node) {
-        // Return the absolute path as a URL (e.g. "file://path/to/json-schema-ref-parser/tests/files...")
-        if (/^win/.test(process.platform)) {
-          absPath = absPath.replace(/\\/g, '/');  // Convert Windows separators to URL separators
-        }
-
-        var fileURL = require('url').format({
-          protocol: 'file:',
-          slashes: true,
-          pathname: absPath
-        });
-
-        return fileURL;
+      if (/^win/.test(process.platform)) {
+        absPath = absPath.replace(/\\/g, '/');  // Convert Windows separators to URL separators
       }
-      else {
-        // Return the absolute URL (e.g. "http://localhost/test/files/...")
-        return path.abs(file);
+
+      // Convert the absolute filesystem path to a a URL
+      // (e.g. "file://path/to/json-schema-ref-parser/tests/files...")
+      var fileURL = require('url').format({
+        protocol: 'file:',
+        slashes: true,
+        pathname: absPath
+      });
+
+      return fileURL;
+    },
+
+    /**
+     * Returns the path of a file in the "test" directory as an http:// URL.
+     */
+    httpURL: function httpURL (file) {
+      var relPath = path.rel(file);
+
+      if (/^win/.test(process.platform)) {
+        relPath = relPath.replace(/\\/g, '/');  // Convert Windows separators to URL separators
       }
+
+      return 'http://localhost/' + relPath;
     },
   };
+
+  // Each function has a `.abs()` function, which returns the absolute path in the same format
+  path.abs.abs = path.abs;
+  path.rel.abs = path.abs;
+  path.fileURL.abs = path.fileURL;
+  path.httpURL.abs = path.httpURL;
 
   /**
    * Returns the absolute path of the "tests" directory
