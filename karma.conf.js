@@ -150,7 +150,7 @@ function configureSauceLabs (config) {
   };
 
   config.reporters.push('saucelabs');
-  config.browsers = config.browsers.concat(Object.keys(sauceLaunchers));
+  config.browsers = Object.keys(sauceLaunchers);
   config.customLaunchers = Object.assign(config.customLaunchers || {}, sauceLaunchers);
   config.sauceLabs = {
     build: build,
