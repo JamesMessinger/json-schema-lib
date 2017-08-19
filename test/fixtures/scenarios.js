@@ -74,7 +74,7 @@
   }
 
   // Allow "only: true" for debugging purposes
-  var only = scenarios.find(function (scenario) { return scenario.only; });
+  var only = scenarios.filter(function (scenario) { return scenario.only; })[0];
   if (only) {
     host.global.scenarios = [only];
   }
