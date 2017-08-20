@@ -53,7 +53,7 @@
       var url = require('url').format({
         protocol: 'file:',
         slashes: true,
-        pathname: absPath
+        pathname: urlEncodePath(absPath),
       });
 
       return url;
@@ -69,7 +69,7 @@
         relPath = relPath.replace(/\\/g, '/');  // Convert Windows separators to URL separators
       }
 
-      return 'http://localhost/' + relPath;
+      return 'http://localhost/' + urlEncodePath(relPath);
     },
   };
 
