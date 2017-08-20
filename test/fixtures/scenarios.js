@@ -57,17 +57,17 @@
       },
       {
         name: 'readSync() (http:// paths)',
-        path: path.fileURL,
+        path: path.httpURL,
         read: readSync,
       },
       {
         name: 'readAsync() (http:// paths, Promise syntax)',
-        path: path.fileURL,
+        path: path.httpURL,
         read: readPromise,
       },
       {
         name: 'readAsync() (http:// paths, Callback syntax)',
-        path: path.fileURL,
+        path: path.httpURL,
         read: readCallback,
       }
     );
